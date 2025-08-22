@@ -252,60 +252,12 @@
                         google.maps.event.trigger(map, 'resize');
                     }, 100);
                 }, () => {
-                    // Location access denied - ask user to enable location
-                    alert('Please enable location services to use SafeRoute properly. The app will show a default location.');
-                    
-                    const defaultCenter = { lat: 18.5204, lng: 73.8567 };
-                    userLocation = defaultCenter;
-                    
-                    map = new google.maps.Map(document.getElementById('map'), {
-                        zoom: 13,
-                        center: defaultCenter,
-                        mapTypeId: google.maps.MapTypeId.ROADMAP
-                    });
-
-                    directionsService = new google.maps.DirectionsService();
-                    directionsRenderer = new google.maps.DirectionsRenderer();
-                    directionsRenderer.setMap(map);
-                    geocoder = new google.maps.Geocoder();
-                    
-                    // Add a marker for default location
-                    new google.maps.Marker({
-                        position: defaultCenter,
-                        map: map,
-                        title: 'Default Location (Enable GPS for your location)',
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 12,
-                            fillColor: '#FF9800',
-                            fillOpacity: 1,
-                            strokeColor: '#ffffff',
-                            strokeWeight: 4
-                        }
-                    });
-                    
-                    // Trigger map resize
-                    setTimeout(() => {
-                        google.maps.event.trigger(map, 'resize');
-                    }, 100);
+                    alert('Location access is required to use SafeRoute. Please enable location services and refresh the page.');
+                    return;
                 }, options);
             } else {
-                // Browser doesn't support geolocation
-                alert('Your browser does not support geolocation. Using default location.');
-                
-                const defaultCenter = { lat: 18.5204, lng: 73.8567 };
-                userLocation = defaultCenter;
-                
-                map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 13,
-                    center: defaultCenter,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP
-                });
-
-                directionsService = new google.maps.DirectionsService();
-                directionsRenderer = new google.maps.DirectionsRenderer();
-                directionsRenderer.setMap(map);
-                geocoder = new google.maps.Geocoder();
+                alert('Your browser does not support geolocation. Please use a modern browser with location services.');
+                return;
             }
         }
 
@@ -323,7 +275,8 @@
             }
 
             if (!userLocation) {
-                userLocation = { lat: 18.5204, lng: 73.8567 };
+                alert('Please enable location services first.');
+                return;
             }
 
             // Clear existing routes

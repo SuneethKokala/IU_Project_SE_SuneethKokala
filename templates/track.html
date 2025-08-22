@@ -66,16 +66,32 @@
         let startTime = new Date();
 
         function initMap() {
-            const puneCenter = { lat: 18.5204, lng: 73.8567 };
-            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    initializeMap(userLocation);
+                }, () => {
+                    alert('Location access is required for tracking. Please enable location services.');
+                    document.getElementById('trackingMap').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; text-align: center;">📍 Location access required<br>Please enable GPS and refresh</div>';
+                });
+            } else {
+                alert('Your browser does not support geolocation.');
+                document.getElementById('trackingMap').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; text-align: center;">❌ Geolocation not supported</div>';
+            }
+        }
+        
+        function initializeMap(location) {
             map = new google.maps.Map(document.getElementById('trackingMap'), {
                 zoom: 15,
-                center: puneCenter,
+                center: location,
                 mapTypeId: 'roadmap'
             });
 
             marker = new google.maps.Marker({
-                position: puneCenter,
+                position: location,
                 map: map,
                 title: 'Current Location',
                 icon: {
@@ -109,22 +125,52 @@
             const interval = setInterval(() => {
                 updateCount++;
                 
-                // Update location slightly
-                const newLat = 18.5204 + (Math.random() - 0.5) * 0.01;
-                const newLng = 73.8567 + (Math.random() - 0.5) * 0.01;
-                const newPos = { lat: newLat, lng: newLng };
-                
-                marker.setPosition(newPos);
-                routeHistory.push(newPos);
-                routePath.setPath(routeHistory);
-                
-                // Update stats
-                const elapsed = Math.floor((new Date() - startTime) / 60000) + updateCount;
-                document.getElementById('lastUpdate').textContent = 'Just now';
-                document.getElementById('timeElapsed').textContent = `${elapsed} min`;
-                document.getElementById('distanceTraveled').textContent = (updateCount * 0.1).toFixed(1);
-                document.getElementById('currentSpeed').textContent = Math.floor(Math.random() * 5) + 3;
-                
+                // Get current location for real tracking
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        const newPos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        updateLocation(newPos);
+                    }, () => {
+                        // Simulate movement if location unavailable
+                        const currentPos = marker.getPosition();
+                        const newPos = {
+                            lat: currentPos.lat() + (Math.random() - 0.5) * 0.001,
+                            lng: currentPos.lng() + (Math.random() - 0.5) * 0.001
+                        };
+                        updateLocation(newPos);
+                    });
+                } else {
+                    // Simulate movement
+                    const currentPos = marker.getPosition();
+                    const newPos = {
+                        lat: currentPos.lat() + (Math.random() - 0.5) * 0.001,
+                        lng: currentPos.lng() + (Math.random() - 0.5) * 0.001
+                    };
+                    updateLocation(newPos);
+                }
+            }, 30000);
+        }
+        
+        function updateLocation(newPos) {
+            marker.setPosition(newPos);
+            routeHistory.push(newPos);
+            routePath.setPath(routeHistory);
+            
+            // Update stats
+            const elapsed = Math.floor((new Date() - startTime) / 60000);
+            document.getElementById('lastUpdate').textContent = 'Just now';
+            document.getElementById('timeElapsed').textContent = `${elapsed} min`;
+            document.getElementById('distanceTraveled').textContent = (routeHistory.length * 0.1).toFixed(1);
+            document.getElementById('currentSpeed').textContent = Math.floor(Math.random() * 5) + 3;
+        }
+        
+        function simulateTracking() {
+            let updateCount = 0;
+            const interval = setInterval(() => {
+                updateCount++;
                 // Add random alerts
                 if (updateCount % 5 === 0) {
                     addAlert(updateCount > 10 ? 'Route deviation detected' : 'On planned route', updateCount > 10 ? 'warning' : 'safe');
