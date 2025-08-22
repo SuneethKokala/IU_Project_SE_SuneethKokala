@@ -814,15 +814,10 @@
                 
                 const trackingUrl = `${window.location.origin}${result.tracking_url}`;
                 
-                alert(`✅ Journey tracking started!\n\n📱 ${result.contacts_notified} contacts notified\n🔗 Tracking URL: ${trackingUrl}\n\nShare this URL with your trusted contacts for live tracking.`);
+                alert(`✅ Journey tracking started!\n\n📱 ${result.contacts_notified} contacts notified\n🔗 Link displayed on screen`);
                 
-                // Copy tracking URL to clipboard and show it prominently
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(trackingUrl);
-                }
-                
-                // Show tracking URL in a more visible way
-                showTrackingUrl(trackingUrl);
+                // Show tracking URL prominently on screen
+                showTrackingLinkOnScreen(trackingUrl);
                 
                 // Start location updates
                 startLocationUpdates();
@@ -891,57 +886,47 @@
             }
         }
         
-        function showTrackingUrl(trackingUrl) {
-            const urlDiv = document.createElement('div');
-            urlDiv.id = 'trackingUrlDisplay';
-            urlDiv.style.cssText = `
+        function showTrackingLinkOnScreen(trackingUrl) {
+            const linkDiv = document.createElement('div');
+            linkDiv.id = 'trackingLinkDisplay';
+            linkDiv.style.cssText = `
                 position: fixed;
-                top: 20px;
-                right: 20px;
+                bottom: 20px;
+                left: 20px;
                 background: rgba(0, 184, 148, 0.95);
                 color: white;
-                padding: 20px;
-                border-radius: 15px;
+                padding: 15px;
+                border-radius: 10px;
                 z-index: 1001;
-                max-width: 350px;
-                font-size: 14px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                max-width: 300px;
+                font-size: 13px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             `;
             
-            urlDiv.innerHTML = `
-                <h4 style="margin: 0 0 15px 0;">🔗 Journey Tracking Link</h4>
-                <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; margin-bottom: 15px; word-break: break-all;">
-                    <a href="${trackingUrl}" target="_blank" style="color: #fff; text-decoration: underline;">${trackingUrl}</a>
+            linkDiv.innerHTML = `
+                <div style="margin-bottom: 10px; font-weight: bold;">🔗 Journey Tracking Link</div>
+                <div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 5px; margin-bottom: 10px; word-break: break-all; font-size: 11px;">
+                    ${trackingUrl}
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="copyTrackingUrl('${trackingUrl}')" style="background: #00b894; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; flex: 1;">Copy Link</button>
-                    <button onclick="closeTrackingUrlDisplay()" style="background: #636e72; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">×</button>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="copyLink('${trackingUrl}')" style="background: #00b894; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Copy</button>
+                    <button onclick="openLink('${trackingUrl}')" style="background: #0984e3; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Open</button>
                 </div>
             `;
             
-            document.body.appendChild(urlDiv);
-            
-            // Auto-hide after 10 seconds
-            setTimeout(() => {
-                if (document.getElementById('trackingUrlDisplay')) {
-                    closeTrackingUrlDisplay();
-                }
-            }, 10000);
+            document.body.appendChild(linkDiv);
         }
         
-        function copyTrackingUrl(url) {
+        function copyLink(url) {
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(url).then(() => {
-                    alert('📋 Link copied to clipboard!');
+                    alert('📋 Link copied!');
                 });
             }
         }
         
-        function closeTrackingUrlDisplay() {
-            const urlDiv = document.getElementById('trackingUrlDisplay');
-            if (urlDiv) {
-                urlDiv.remove();
-            }
+        function openLink(url) {
+            window.open(url, '_blank');
         }
         
         function showTrackingInfo(journeyData) {
@@ -991,10 +976,14 @@
                     clearInterval(locationUpdateInterval);
                 }
                 
-                // Remove tracking info
+                // Remove tracking info and link display
                 const trackingInfo = document.getElementById('trackingInfo');
                 if (trackingInfo) {
                     trackingInfo.remove();
+                }
+                const linkDisplay = document.getElementById('trackingLinkDisplay');
+                if (linkDisplay) {
+                    linkDisplay.remove();
                 }
                 
                 // Reset UI
