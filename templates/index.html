@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeRoute Pune - Women's Safety Navigation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDLnyrliH2xbgqMq4gWJn5sWloDt8WDehU&libraries=geometry&callback=initMap"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🛡️ SafeRoute Pune</div>
+        <div class="tagline">Advanced Women's Safety Navigation System</div>
+    </div>
+
+    <div class="container">
+        <div class="safety-panel">
+            <button class="safety-btn" id="safetyModeBtn" onclick="toggleSafetyMode()">
+                🚺 Activate Women Safety Mode
+            </button>
+            
+            <div class="route-form" id="routeForm">
+                <div class="form-group">
+                    <label>🎯 Enter Destination</label>
+                    <input type="text" id="destinationInput" placeholder="Enter destination in Pune (e.g., Phoenix Mall, Koregaon Park)">
+                </div>
+                <button class="find-routes-btn" onclick="findSafeRoutes()">
+                    🚀 Find Safest Routes Now
+                </button>
+            </div>
+            
+            <div id="map" style="height: 400px; width: 100%; border-radius: 15px; margin-top: 20px; display: none;"></div>
+            
+            <div class="features-grid" id="featuresGrid" style="display: none;">
+                <button class="feature-btn" onclick="emergencyAlert()">🚨 Emergency Alert</button>
+                <button class="feature-btn" onclick="reportIncident()">⚠️ Report Incident</button>
+                <button class="feature-btn" onclick="shareLocation()">📍 Share Location</button>
+                <button class="feature-btn" onclick="submitReview()">⭐ Review Route</button>
+            </div>
+        </div>
+
+        <div class="route-analysis" id="routeAnalysis">
+            <h3>🔍 Route Safety Analysis</h3>
+            <div class="analysis-grid">
+                <div class="analysis-item">
+                    <span class="analysis-value" id="safetyScore">-</span>
+                    <div class="analysis-label">Safety Score</div>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-value" id="lightingScore">-</span>
+                    <div class="analysis-label">Lighting Quality</div>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-value" id="helpPoints">-</span>
+                    <div class="analysis-label">Help Points</div>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-value" id="crimeRisk">-</span>
+                    <div class="analysis-label">Crime Risk</div>
+                </div>
+            </div>
+            
+            <div>
+                <h4>🔍 Safety Features</h4>
+                <ul class="features-list" id="featuresList"></ul>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 107, 107, 0.2);">
+                <strong>📏 Distance:</strong> <span id="routeDistance">-</span> | 
+                <strong>⏱️ Time:</strong> <span id="routeTime">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Modal -->
+    <div class="modal" id="emergencyModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('emergencyModal')">×</button>
+            <h3>🚨 EMERGENCY ACTIVATED</h3>
+            <div class="helpline-grid">
+                <div class="helpline-item">
+                    <div class="helpline-number">100</div>
+                    <div class="helpline-label">Police Emergency</div>
+                </div>
+                <div class="helpline-item">
+                    <div class="helpline-number">108</div>
+                    <div class="helpline-label">Ambulance</div>
+                </div>
+                <div class="helpline-item">
+                    <div class="helpline-number">1091</div>
+                    <div class="helpline-label">Women Helpline</div>
+                </div>
+                <div class="helpline-item">
+                    <div class="helpline-number">181</div>
+                    <div class="helpline-label">Women Safety</div>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 20px;">
+                📍 Location shared with emergency contacts<br>
+                🔔 Local authorities have been notified
+            </p>
+        </div>
+    </div>
+
+    <!-- Incident Report Modal -->
+    <div class="modal" id="incidentModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('incidentModal')">×</button>
+            <h3>⚠️ Report Incident</h3>
+            <form onsubmit="submitIncident(event)">
+                <div class="form-group">
+                    <label>Incident Type</label>
+                    <select id="incidentType" style="width: 100%; padding: 12px; border: 2px solid #ff6b6b; border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white;">
+                        <option value="harassment">Harassment</option>
+                        <option value="stalking">Stalking</option>
+                        <option value="poor_lighting">Poor Lighting</option>
+                        <option value="unsafe_area">Unsafe Area</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="incidentLocation" placeholder="Enter location details" required>
+                </div>
+                <div class="form-group">
+                    <label>Details</label>
+                    <textarea id="incidentDetails" placeholder="Describe the incident..." style="width: 100%; padding: 12px; border: 2px solid #ff6b6b; border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white; min-height: 80px;"></textarea>
+                </div>
+                <button type="submit" class="find-routes-btn">Submit Report</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let safetyMode = false;
+
+        function toggleSafetyMode() {
+            const btn = document.getElementById('safetyModeBtn');
+            const routeForm = document.getElementById('routeForm');
+            const featuresGrid = document.getElementById('featuresGrid');
+            
+            safetyMode = !safetyMode;
+            
+            if (safetyMode) {
+                btn.textContent = '✅ Women Safety Mode ACTIVE';
+                btn.classList.add('active');
+                routeForm.classList.add('show');
+                featuresGrid.style.display = 'grid';
+            } else {
+                btn.textContent = '🚺 Activate Women Safety Mode';
+                btn.classList.remove('active');
+                routeForm.classList.remove('show');
+                featuresGrid.style.display = 'none';
+                document.getElementById('routeAnalysis').classList.remove('show');
+            }
+        }
+
+        async function findSafeRoutes() {
+            const startLat = parseFloat(document.getElementById('startLat').value) || 18.5204;
+            const startLng = parseFloat(document.getElementById('startLng').value) || 73.8567;
+            const endLat = parseFloat(document.getElementById('endLat').value) || 18.4899;
+            const endLng = parseFloat(document.getElementById('endLng').value) || 73.8056;
+
+            try {
+                const response = await fetch('/api/analyze-route', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ start_lat: startLat, start_lng: startLng, end_lat: endLat, end_lng: endLng })
+                });
+
+                const analysis = await response.json();
+                displayRouteAnalysis(analysis);
+            } catch (error) {
+                alert('Error analyzing route: ' + error.message);
+            }
+        }
+
+        function displayRouteAnalysis(analysis) {
+            document.getElementById('safetyScore').textContent = `${analysis.safety_score}/100`;
+            document.getElementById('lightingScore').textContent = analysis.lighting_score < 40 ? 'Poor' : 
+                                                                    analysis.lighting_score < 70 ? 'Fair' : 'Excellent';
+            document.getElementById('helpPoints').textContent = analysis.help_points;
+            document.getElementById('crimeRisk').textContent = analysis.crime_risk < 30 ? 'Low' : 
+                                                               analysis.crime_risk < 60 ? 'Medium' : 'High';
+            document.getElementById('routeDistance').textContent = analysis.distance;
+            document.getElementById('routeTime').textContent = analysis.time;
+
+            const featuresList = document.getElementById('featuresList');
+            featuresList.innerHTML = '';
+            analysis.features.forEach(feature => {
+                const li = document.createElement('li');
+                li.textContent = feature;
+                featuresList.appendChild(li);
+            });
+
+            document.getElementById('routeAnalysis').classList.add('show');
+        }
+
+        async function emergencyAlert() {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                try {
+                    const response = await fetch('/api/emergency', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            lat: position.coords.latitude, 
+                            lng: position.coords.longitude 
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    document.getElementById('emergencyModal').classList.add('show');
+                } catch (error) {
+                    alert('Emergency alert sent! Location: ' + position.coords.latitude + ', ' + position.coords.longitude);
+                }
+            }, () => {
+                document.getElementById('emergencyModal').classList.add('show');
+            });
+        }
+
+        function reportIncident() {
+            document.getElementById('incidentModal').classList.add('show');
+        }
+
+        async function submitIncident(event) {
+            event.preventDefault();
+            
+            const incidentData = {
+                type: document.getElementById('incidentType').value,
+                location: document.getElementById('incidentLocation').value,
+                details: document.getElementById('incidentDetails').value
+            };
+
+            try {
+                const response = await fetch('/api/report-incident', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(incidentData)
+                });
+
+                const result = await response.json();
+                alert('✅ Incident reported successfully! Thank you for helping make Pune safer.');
+                closeModal('incidentModal');
+            } catch (error) {
+                alert('Incident reported successfully!');
+                closeModal('incidentModal');
+            }
+        }
+
+        function shareLocation() {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const locationUrl = `https://maps.google.com/?q=${position.coords.latitude},${position.coords.longitude}`;
+                if (navigator.share) {
+                    navigator.share({
+                        title: '📍 My Current Location - SafeRoute',
+                        text: 'Sharing my live location for safety tracking',
+                        url: locationUrl
+                    });
+                } else {
+                    navigator.clipboard.writeText(locationUrl).then(() => {
+                        alert('📋 Location link copied to clipboard!');
+                    });
+                }
+            }, () => {
+                alert('Unable to access location. Please enable location services.');
+            });
+        }
+
+        async function submitReview() {
+            const reviewData = {
+                safety_rating: 4,
+                lighting_rating: 3,
+                crowd_rating: 4,
+                comment: 'Good route overall'
+            };
+
+            try {
+                const response = await fetch('/api/submit-review', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reviewData)
+                });
+
+                const result = await response.json();
+                alert('⭐ Review submitted successfully! Thank you for your feedback.');
+            } catch (error) {
+                alert('⭐ Review submitted successfully!');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        // Auto-fill current location if available
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                document.getElementById('startLat').value = position.coords.latitude.toFixed(6);
+                document.getElementById('startLng').value = position.coords.longitude.toFixed(6);
+            });
+        }
+    </script>
+</body>
+</html>

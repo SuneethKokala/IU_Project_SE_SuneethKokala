@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Live Tracking</title>
+</head>
+<body>
+    <h1>Live Tracking Test</h1>
+    <div id="status">Loading...</div>
+    <div id="data"></div>
+    
+    <script>
+        // Test with the journey ID from our test
+        const journeyId = 'a27ef0d7-0716-4015-9af0-8e69f9ff9450';
+        
+        async function testTracking() {
+            try {
+                const response = await fetch(`/api/journey-status/${journeyId}`);
+                const data = await response.json();
+                
+                document.getElementById('status').textContent = 'Success!';
+                document.getElementById('data').innerHTML = `
+                    <h3>Journey Data:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    <h3>Live Tracking URL:</h3>
+                    <a href="/track/${journeyId}" target="_blank">Open Live Tracking</a>
+                `;
+                
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        testTracking();
+    </script>
+</body>
+</html>

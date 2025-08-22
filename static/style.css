@@ -1,0 +1,445 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+    font-family: 'Arial', sans-serif; 
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    min-height: 100vh;
+}
+.header {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 15px 20px;
+    text-align: center;
+}
+.logo { font-size: 24px; font-weight: bold; }
+.tagline { font-size: 14px; opacity: 0.9; margin-top: 5px; }
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.safety-panel {
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.safety-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.safety-btn:hover { transform: translateY(-2px); }
+.safety-btn.active { background: linear-gradient(135deg, #00b894, #00a085); }
+
+.route-form {
+    display: block;
+    margin-top: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ff6b6b;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.form-group input::placeholder { color: rgba(255, 255, 255, 0.7); }
+
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ff6b6b;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.form-group select option {
+    background: #333;
+    color: white;
+}
+
+.find-routes-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.find-routes-btn:hover { transform: translateY(-2px); }
+
+.safety-priority-notice {
+    background: rgba(0, 184, 148, 0.2);
+    border: 1px solid #00b894;
+    color: #00b894;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.feature-btn {
+    background: rgba(255, 107, 107, 0.2);
+    border: 2px solid #ff6b6b;
+    color: white;
+    padding: 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.feature-btn:hover {
+    background: #ff6b6b;
+    transform: translateY(-2px);
+}
+
+.route-analysis {
+    display: none;
+    background: rgba(0, 0, 0, 0.9);
+    border-radius: 20px;
+    padding: 25px;
+    margin-top: 20px;
+    color: white;
+}
+
+.route-details {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.route-analysis.show { display: block; }
+
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.analysis-item {
+    background: rgba(255, 107, 107, 0.1);
+    padding: 15px;
+    border-radius: 15px;
+    text-align: center;
+    border: 1px solid rgba(255, 107, 107, 0.2);
+}
+
+.analysis-value {
+    font-size: 22px;
+    font-weight: bold;
+    color: #ff6b6b;
+    display: block;
+}
+
+.analysis-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 5px;
+    text-transform: uppercase;
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+}
+
+.features-list li {
+    padding: 8px 12px;
+    margin: 5px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border-left: 3px solid #ff6b6b;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.show { display: flex; }
+
+.modal-content {
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 400px;
+    width: 90%;
+    border: 2px solid #ff6b6b;
+    position: relative;
+}
+
+.modal h3 {
+    margin-bottom: 20px;
+    color: #ff6b6b;
+    text-align: center;
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+}
+
+.helpline-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.helpline-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.helpline-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.helpline-label {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-top: 5px;
+}
+
+/* Route Options Styling */
+.recommended-route {
+    background: linear-gradient(135deg, #00b894, #00a085);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.route-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.route-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.route-badge.recommended {
+    background: #ffd700;
+    color: #000;
+}
+
+.route-stats {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.stat {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.routes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.route-option {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 107, 107, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.route-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #ff6b6b;
+    transform: translateY(-2px);
+}
+
+.route-option.selected {
+    background: rgba(255, 107, 107, 0.2);
+    border-color: #ff6b6b;
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+}
+
+.route-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.route-info h4 {
+    margin: 0 0 8px 0;
+    color: white;
+}
+
+.route-badges {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.safety-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.safety-badge.high {
+    background: #00b894;
+    color: white;
+}
+
+.safety-badge.medium {
+    background: #fdcb6e;
+    color: #000;
+}
+
+.safety-badge.low {
+    background: #e17055;
+    color: white;
+}
+
+.route-features {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.feature-tag {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ai-insights {
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(0, 184, 148, 0.1);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 184, 148, 0.3);
+}
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.insight-item {
+    background: rgba(0, 184, 148, 0.1);
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid rgba(0, 184, 148, 0.2);
+}
+
+.insight-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #00b894;
+    display: block;
+}
+
+.insight-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 5px;
+    text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+    .container { padding: 10px; }
+    .safety-panel { padding: 20px; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .analysis-grid { grid-template-columns: 1fr 1fr; }
+    .helpline-grid { grid-template-columns: 1fr; }
+    
+    .route-stats {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .route-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .insights-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
