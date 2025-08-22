@@ -32,6 +32,9 @@ def emergency_alert():
         account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
         auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
         
+        print(f"Debug: Emergency - Account SID: {account_sid[:10] if account_sid else 'None'}...")
+        print(f"Debug: Emergency - Auth Token exists: {bool(auth_token)}")
+        
         if account_sid and auth_token and account_sid != 'your_twilio_account_sid_here':
             client = Client(account_sid, auth_token)
             message = f"🚨 EMERGENCY ALERT 🚨\n\nUser needs help!\n\n📍 Location: https://maps.google.com/?q={lat},{lng}\n\nTime: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
@@ -115,8 +118,9 @@ def start_journey():
         account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
         auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
         
-        print(f"Debug: Account SID exists: {bool(account_sid)}")
-        print(f"Debug: Auth Token exists: {bool(auth_token)}")
+        print(f"Debug: Journey - Account SID: {account_sid[:10] if account_sid else 'None'}...")
+        print(f"Debug: Journey - Auth Token exists: {bool(auth_token)}")
+        print(f"Debug: Journey - Contacts: {data.get('trusted_contacts', [])}")
         
         if account_sid and auth_token and account_sid != 'your_twilio_account_sid_here':
             client = Client(account_sid, auth_token)
