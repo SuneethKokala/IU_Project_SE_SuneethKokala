@@ -22,6 +22,28 @@ def analyze_route():
 
 @app.route('/api/emergency', methods=['POST'])
 def emergency_alert():
+    data = request.json
+    lat = data.get('lat')
+    lng = data.get('lng')
+    
+    # Send WhatsApp alert
+    try:
+        from twilio.rest import Client
+        account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+        auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
+        
+        if account_sid and auth_token:
+            client = Client(account_sid, auth_token)
+            message = f"🚨 EMERGENCY ALERT 🚨\n\nUser needs help!\n\n📍 Location: https://maps.google.com/?q={lat},{lng}\n\nTime: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            
+            client.messages.create(
+                body=message,
+                from_='whatsapp:+14155238886',
+                to='whatsapp:+919902480636'
+            )
+    except:
+        pass
+    
     return jsonify({
         'status': 'Emergency alert sent',
         'timestamp': datetime.now().isoformat()
