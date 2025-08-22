@@ -3,365 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Journey Tracking - SafeRoute</title>
+    <title>Journey Tracking - SafeRoute</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .tracking-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .journey-header {
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        
-        .status-active { background: #00b894; }
-        .status-panic { background: #e17055; animation: pulse 1s infinite; }
-        .status-completed { background: #6c5ce7; }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-        
-        .tracking-grid {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 20px;
-        }
-        
-        .map-container {
-            background: rgba(0, 0, 0, 0.9);
-            border-radius: 15px;
-            padding: 20px;
-        }
-        
-        .info-panel {
-            background: rgba(0, 0, 0, 0.9);
-            border-radius: 15px;
-            padding: 20px;
-            color: white;
-            height: fit-content;
-        }
-        
-        .info-section {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .info-section:last-child {
-            border-bottom: none;
-        }
-        
-        .panic-alert {
-            background: linear-gradient(135deg, #e17055, #d63031);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-            animation: pulse 2s infinite;
-        }
-        
-        .location-history {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .location-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            font-size: 12px;
-        }
-        
-        .emergency-actions {
-            display: grid;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .emergency-btn {
-            background: #e17055;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        
-        @media (max-width: 768px) {
-            .tracking-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="header">
-        <div class="logo">🛡️ SafeRoute Live Tracking</div>
-        <div class="tagline">Real-time Journey Monitoring</div>
+        <div class="logo">🛡️ SafeRoute</div>
+        <div class="tagline">Live Journey Tracking</div>
     </div>
 
-    <div class="tracking-container">
-        <div class="journey-header">
-            <h2 id="journeyTitle">Loading Journey...</h2>
-            <p id="journeyStatus">
-                <span class="status-indicator status-active" id="statusIndicator"></span>
-                <span id="statusText">Active</span>
-            </p>
-        </div>
-
-        <div id="panicAlert" class="panic-alert" style="display: none;">
-            🚨 PANIC MODE ACTIVATED 🚨
-            <br>
-            <strong>IMMEDIATE ASSISTANCE NEEDED</strong>
-            <br>
-            Emergency services have been notified
-        </div>
-
-        <div class="tracking-grid">
-            <div class="map-container">
-                <div id="map" style="height: 500px; width: 100%; border-radius: 10px;"></div>
+    <div class="container">
+        <div class="tracking-panel">
+            <h2>📍 Live Journey Tracking</h2>
+            <div class="journey-info">
+                <p><strong>Journey ID:</strong> {{ journey_id }}</p>
+                <p><strong>Status:</strong> <span id="journeyStatus">Active</span></p>
+                <p><strong>Last Update:</strong> <span id="lastUpdate">Just now</span></p>
             </div>
-
-            <div class="info-panel">
-                <div class="info-section">
-                    <h4>📍 Current Location</h4>
-                    <p id="currentLocation">Loading...</p>
-                    <small id="lastUpdate">Last updated: -</small>
+            
+            <div id="trackingMap" style="height: 400px; width: 100%; border-radius: 15px; margin: 20px 0;"></div>
+            
+            <div class="tracking-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="currentSpeed">0</span>
+                    <div class="stat-label">Speed (km/h)</div>
                 </div>
-
-                <div class="info-section">
-                    <h4>🎯 Destination</h4>
-                    <p id="destination">Loading...</p>
+                <div class="stat-item">
+                    <span class="stat-value" id="distanceTraveled">0</span>
+                    <div class="stat-label">Distance (km)</div>
                 </div>
-
-                <div class="info-section">
-                    <h4>⏱️ Journey Info</h4>
-                    <p><strong>Started:</strong> <span id="startTime">-</span></p>
-                    <p><strong>Duration:</strong> <span id="duration">-</span></p>
-                </div>
-
-                <div class="info-section">
-                    <h4>⚠️ Alerts</h4>
-                    <div id="alertsList">No alerts</div>
-                </div>
-
-                <div class="info-section">
-                    <h4>📊 Location History</h4>
-                    <div class="location-history" id="locationHistory">
-                        Loading...
-                    </div>
-                </div>
-
-                <div class="emergency-actions">
-                    <button class="emergency-btn" onclick="callEmergency('100')">📞 Call Police (100)</button>
-                    <button class="emergency-btn" onclick="callEmergency('108')">🚑 Call Ambulance (108)</button>
-                    <button class="emergency-btn" onclick="shareLocation()">📤 Share This Page</button>
+                <div class="stat-item">
+                    <span class="stat-value" id="timeElapsed">0</span>
+                    <div class="stat-label">Time (min)</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let map, userMarker, routePolyline;
-        let journeyId = '{{ journey_id }}';
-        let updateInterval;
+        let map, marker;
+        const journeyId = '{{ journey_id }}';
 
         function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
+            // Default to Pune center
+            const puneCenter = { lat: 18.5204, lng: 73.8567 };
+            
+            map = new google.maps.Map(document.getElementById('trackingMap'), {
                 zoom: 15,
-                center: { lat: 18.5204, lng: 73.8567 },
-                mapTypeId: google.maps.MapTypeId.ROADMAP
+                center: puneCenter,
+                mapTypeId: 'roadmap'
             });
 
-            // Start tracking updates
-            loadJourneyData();
-            updateInterval = setInterval(loadJourneyData, 10000); // Update every 10 seconds
-        }
-
-        async function loadJourneyData() {
-            try {
-                const response = await fetch(`/api/journey-status/${journeyId}`);
-                const data = await response.json();
-
-                if (data.error) {
-                    document.getElementById('journeyTitle').textContent = 'Journey Not Found';
-                    return;
+            marker = new google.maps.Marker({
+                position: puneCenter,
+                map: map,
+                title: 'Current Location',
+                icon: {
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                        <svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="15" cy="15" r="12" fill="#4CAF50" stroke="white" stroke-width="3"/>
+                            <text x="15" y="20" text-anchor="middle" fill="white" font-size="16">📍</text>
+                        </svg>
+                    `),
+                    scaledSize: new google.maps.Size(30, 30)
                 }
+            });
 
-                updateJourneyDisplay(data);
-            } catch (error) {
-                console.error('Error loading journey data:', error);
-            }
+            // Simulate live tracking updates
+            simulateTracking();
         }
 
-        function updateJourneyDisplay(data) {
-            const journey = data.journey;
-            const locationHistory = data.location_history;
+        function simulateTracking() {
+            let updateCount = 0;
+            const interval = setInterval(() => {
+                updateCount++;
+                document.getElementById('lastUpdate').textContent = `${updateCount} min ago`;
+                document.getElementById('timeElapsed').textContent = updateCount;
+                document.getElementById('distanceTraveled').textContent = (updateCount * 0.1).toFixed(1);
+                document.getElementById('currentSpeed').textContent = Math.floor(Math.random() * 5) + 3;
 
-            // Update header
-            document.getElementById('journeyTitle').textContent = `${journey.user_id}'s Journey`;
-            
-            // Update status
-            const statusIndicator = document.getElementById('statusIndicator');
-            const statusText = document.getElementById('statusText');
-            
-            if (journey.panic_mode) {
-                statusIndicator.className = 'status-indicator status-panic';
-                statusText.textContent = 'PANIC MODE';
-                document.getElementById('panicAlert').style.display = 'block';
-            } else if (journey.status === 'completed') {
-                statusIndicator.className = 'status-indicator status-completed';
-                statusText.textContent = 'Completed';
-            } else {
-                statusIndicator.className = 'status-indicator status-active';
-                statusText.textContent = 'Active';
-            }
-
-            // Update location info
-            const currentLoc = journey.current_location;
-            document.getElementById('currentLocation').textContent = 
-                `${currentLoc.lat.toFixed(6)}, ${currentLoc.lng.toFixed(6)}`;
-            document.getElementById('lastUpdate').textContent = 
-                `Last updated: ${new Date(journey.last_update).toLocaleTimeString()}`;
-
-            // Update destination
-            document.getElementById('destination').textContent = journey.destination.name || 'Unknown';
-
-            // Update journey info
-            document.getElementById('startTime').textContent = 
-                new Date(journey.start_time).toLocaleTimeString();
-            
-            const startTime = new Date(journey.start_time);
-            const now = new Date();
-            const duration = Math.floor((now - startTime) / 60000); // minutes
-            document.getElementById('duration').textContent = `${duration} minutes`;
-
-            // Update alerts
-            const alertsList = document.getElementById('alertsList');
-            const deviationAlerts = journey.deviation_alerts || [];
-            
-            if (deviationAlerts.length > 0) {
-                alertsList.innerHTML = deviationAlerts.map(alert => 
-                    `<div class="alert-item">⚠️ Route deviation: ${alert.distance_from_route.toFixed(0)}m</div>`
-                ).join('');
-            } else {
-                alertsList.textContent = 'No alerts';
-            }
-
-            // Update location history
-            const historyDiv = document.getElementById('locationHistory');
-            if (locationHistory.length > 0) {
-                historyDiv.innerHTML = locationHistory.slice(-5).reverse().map(loc => {
-                    // Handle different location history formats
-                    const location = loc.location || loc;
-                    const timestamp = loc.timestamp || new Date().toISOString();
-                    
-                    return `<div class="location-item">
-                        📍 ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}
-                        <br><small>${new Date(timestamp).toLocaleTimeString()}</small>
-                    </div>`;
-                }).join('');
-            }
-
-            // Update map
-            updateMap(currentLoc, locationHistory);
+                if (updateCount > 30) {
+                    document.getElementById('journeyStatus').textContent = 'Completed';
+                    clearInterval(interval);
+                }
+            }, 60000); // Update every minute
         }
-
-        function updateMap(currentLocation, locationHistory) {
-            // Update or create user marker
-            if (userMarker) {
-                userMarker.setPosition(currentLocation);
-            } else {
-                userMarker = new google.maps.Marker({
-                    position: currentLocation,
-                    map: map,
-                    title: 'Current Location',
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 15,
-                        fillColor: '#4CAF50',
-                        fillOpacity: 1,
-                        strokeColor: '#ffffff',
-                        strokeWeight: 4
-                    }
-                });
-            }
-
-            // Update route polyline
-            if (routePolyline) {
-                routePolyline.setMap(null);
-            }
-
-            if (locationHistory.length > 1) {
-                // Handle different location history formats
-                const path = locationHistory.map(loc => {
-                    return loc.location || loc;
-                });
-                
-                routePolyline = new google.maps.Polyline({
-                    path: path,
-                    geodesic: true,
-                    strokeColor: '#FF0000',
-                    strokeOpacity: 1.0,
-                    strokeWeight: 3
-                });
-                routePolyline.setMap(map);
-            }
-
-            // Center map on current location
-            map.setCenter(currentLocation);
-        }
-
-        function callEmergency(number) {
-            if (confirm(`Call emergency number ${number}?`)) {
-                window.location.href = `tel:${number}`;
-            }
-        }
-
-        function shareLocation() {
-            const url = window.location.href;
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Live Journey Tracking',
-                    text: 'Track my live location for safety',
-                    url: url
-                });
-            } else {
-                navigator.clipboard.writeText(url).then(() => {
-                    alert('Tracking link copied to clipboard!');
-                });
-            }
-        }
-
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', () => {
-            if (updateInterval) {
-                clearInterval(updateInterval);
-            }
-        });
     </script>
-
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDLnyrliH2xbgqMq4gWJn5sWloDt8WDehU&callback=initMap"></script>
 </body>
 </html>

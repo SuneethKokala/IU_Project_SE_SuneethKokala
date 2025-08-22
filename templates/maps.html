@@ -816,10 +816,13 @@
                 
                 alert(`✅ Journey tracking started!\n\n📱 ${result.contacts_notified} contacts notified\n🔗 Tracking URL: ${trackingUrl}\n\nShare this URL with your trusted contacts for live tracking.`);
                 
-                // Copy tracking URL to clipboard
+                // Copy tracking URL to clipboard and show it prominently
                 if (navigator.clipboard) {
                     navigator.clipboard.writeText(trackingUrl);
                 }
+                
+                // Show tracking URL in a more visible way
+                showTrackingUrl(trackingUrl);
                 
                 // Start location updates
                 startLocationUpdates();
@@ -888,7 +891,62 @@
             }
         }
         
+        function showTrackingUrl(trackingUrl) {
+            const urlDiv = document.createElement('div');
+            urlDiv.id = 'trackingUrlDisplay';
+            urlDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(0, 184, 148, 0.95);
+                color: white;
+                padding: 20px;
+                border-radius: 15px;
+                z-index: 1001;
+                max-width: 350px;
+                font-size: 14px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            `;
+            
+            urlDiv.innerHTML = `
+                <h4 style="margin: 0 0 15px 0;">🔗 Journey Tracking Link</h4>
+                <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; margin-bottom: 15px; word-break: break-all;">
+                    <a href="${trackingUrl}" target="_blank" style="color: #fff; text-decoration: underline;">${trackingUrl}</a>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="copyTrackingUrl('${trackingUrl}')" style="background: #00b894; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; flex: 1;">Copy Link</button>
+                    <button onclick="closeTrackingUrlDisplay()" style="background: #636e72; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">×</button>
+                </div>
+            `;
+            
+            document.body.appendChild(urlDiv);
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                if (document.getElementById('trackingUrlDisplay')) {
+                    closeTrackingUrlDisplay();
+                }
+            }, 10000);
+        }
+        
+        function copyTrackingUrl(url) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('📋 Link copied to clipboard!');
+                });
+            }
+        }
+        
+        function closeTrackingUrlDisplay() {
+            const urlDiv = document.getElementById('trackingUrlDisplay');
+            if (urlDiv) {
+                urlDiv.remove();
+            }
+        }
+        
         function showTrackingInfo(journeyData) {
+            const trackingUrl = `${window.location.origin}${journeyData.tracking_url}`;
+            
             const infoDiv = document.createElement('div');
             infoDiv.id = 'trackingInfo';
             infoDiv.style.cssText = `
@@ -908,7 +966,7 @@
                 <h4>🚀 Journey Active</h4>
                 <p><strong>ID:</strong> ${journeyData.journey_id.substring(0, 8)}...</p>
                 <p><strong>Contacts:</strong> ${journeyData.contacts_notified} notified</p>
-                <p><strong>Tracking URL:</strong> <a href="${journeyData.tracking_url}" target="_blank" style="color: #fff;">View Live</a></p>
+                <p><strong>Tracking:</strong> <a href="${trackingUrl}" target="_blank" style="color: #fff; text-decoration: underline;">View Live</a></p>
                 <button onclick="endJourneyTracking()" style="background: #e17055; color: white; border: none; padding: 8px 12px; border-radius: 5px; margin-top: 10px; cursor: pointer;">End Journey</button>
             `;
             

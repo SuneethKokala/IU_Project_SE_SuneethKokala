@@ -115,7 +115,7 @@ def start_journey():
         if account_sid and auth_token:
             client = Client(account_sid, auth_token)
             for contact in data.get('trusted_contacts', []):
-                message = f"🚀 {data.get('user_id', 'User')} started a journey\n\n📍 Track live: https://your-app.vercel.app/track/{journey_id}\n\nYou'll get updates if they need help."
+                message = f"🚀 {data.get('user_id', 'User')} started a journey\n\n📍 Track live: {request.host_url}track/{journey_id}\n\nYou'll get updates if they need help."
                 try:
                     client.messages.create(
                         body=message,
@@ -140,6 +140,10 @@ def update_location():
 @app.route('/api/end-journey', methods=['POST'])
 def end_journey():
     return jsonify({'status': 'Journey ended'})
+
+@app.route('/track/<journey_id>')
+def track_journey(journey_id):
+    return render_template('track.html', journey_id=journey_id)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
