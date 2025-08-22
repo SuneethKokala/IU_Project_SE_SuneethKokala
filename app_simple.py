@@ -41,7 +41,9 @@ def emergency_alert():
             
             # Use environment variable for emergency contact or fallback
             emergency_contact = os.environ.get('EMERGENCY_WHATSAPP', '+919902480636')
-            print(f"Debug: Sending to {emergency_contact}")
+            print(f"Debug: Emergency - Account SID: {account_sid[:10]}...")
+            print(f"Debug: Emergency - Sending to: {emergency_contact}")
+            print(f"Debug: Emergency - From: whatsapp:+14155238886")
             print(f"Debug: Message: {message}")
             
             response = client.messages.create(
