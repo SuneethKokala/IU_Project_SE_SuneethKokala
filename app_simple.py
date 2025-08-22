@@ -41,11 +41,16 @@ def emergency_alert():
             
             # Use environment variable for emergency contact or fallback
             emergency_contact = os.environ.get('EMERGENCY_WHATSAPP', '+919902480636')
-            client.messages.create(
+            print(f"Debug: Sending to {emergency_contact}")
+            print(f"Debug: Message: {message}")
+            
+            response = client.messages.create(
                 body=message,
                 from_='whatsapp:+14155238886',
                 to=f'whatsapp:{emergency_contact}'
             )
+            print(f"Debug: Message SID: {response.sid}")
+            print(f"Debug: Message Status: {response.status}")
             print("Debug: Emergency WhatsApp sent")
         else:
             print("Debug: Emergency - Twilio credentials not configured")
