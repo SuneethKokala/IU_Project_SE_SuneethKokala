@@ -150,6 +150,14 @@ def update_location():
 def end_journey():
     return jsonify({'status': 'Journey ended'})
 
+@app.route('/api/panic-mode', methods=['POST'])
+def panic_mode():
+    return jsonify({'status': 'Panic mode activated', 'contacts_notified': True})
+
+@app.route('/api/get-reports', methods=['GET'])
+def get_reports():
+    return jsonify([])
+
 @app.route('/track/<journey_id>')
 def track_journey(journey_id):
     return render_template('track.html', journey_id=journey_id)
