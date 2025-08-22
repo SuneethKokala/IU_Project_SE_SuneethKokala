@@ -39,10 +39,12 @@ def emergency_alert():
             client = Client(account_sid, auth_token)
             message = f"🚨 EMERGENCY ALERT 🚨\n\nUser needs help!\n\n📍 Location: https://maps.google.com/?q={lat},{lng}\n\nTime: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
             
+            # Use environment variable for emergency contact or fallback
+            emergency_contact = os.environ.get('EMERGENCY_WHATSAPP', '+919902480636')
             client.messages.create(
                 body=message,
                 from_='whatsapp:+14155238886',
-                to='whatsapp:+919902480636'
+                to=f'whatsapp:{emergency_contact}'
             )
             print("Debug: Emergency WhatsApp sent")
         else:
