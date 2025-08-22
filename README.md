@@ -1,5 +1,5 @@
 # women-safety-map
-A next-generation safety-first navigation web app that leverages the **Google Maps Platform** to help women in Pune choose the **safest walking routes** based on real-time infrastructure, crowdsourced safety data, and location intelligence.
+A next-generation safety-first navigation web app that leverages the **Google Maps Platform** to help women choose the **safest walking routes** based on real-time infrastructure, crowdsourced safety data, and location intelligence.
 
 ---
 
@@ -21,7 +21,7 @@ A next-generation safety-first navigation web app that leverages the **Google Ma
 ## 🌐 Features
 
 - ✅ **Activate Safety Mode**: One-click toggle to enable women's safety features on the map.
-- 📍 **Tap-to-Navigate**: Tap anywhere in Pune or use the search bar to select a destination.
+- 📍 **Tap-to-Navigate**: Tap anywhere on the map or use the search bar to select a destination.
 - 🔍 **Smart Safety Routes**: System calculates 3 optimal routes ranked by safety — not distance.
 - 🧠 **Route Analysis Panel**:
   - Safety Score
@@ -39,7 +39,7 @@ A next-generation safety-first navigation web app that leverages the **Google Ma
   - Orange = Moderate
   - Red = Risky/Dark Areas
 
-📍 **Note:** For **demo purposes**, the system assumes your current location is **in Pune**.
+📍 **Note:** The system uses your **actual GPS location** for accurate safety routing.
 
 ---
 ## 🧱 Built With
@@ -64,7 +64,7 @@ A next-generation safety-first navigation web app that leverages the **Google Ma
 
 ## 🧭 Data Points Used
 
-- Pune Police Stations 🟦
+- Local Police Stations 🟦
 - Major Hospitals 🟩
 - Commercial Zones 🟧
 - Known Crime Hotspots 🔴
