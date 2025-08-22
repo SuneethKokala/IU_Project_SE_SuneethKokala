@@ -18,6 +18,8 @@
             <div class="journey-info">
                 <p><strong>Journey ID:</strong> {{ journey_id }}</p>
                 <p><strong>Status:</strong> <span id="journeyStatus">Active</span></p>
+                <p><strong>Start Time:</strong> <span id="startTime">-</span></p>
+                <p><strong>Destination:</strong> <span id="destination">-</span></p>
                 <p><strong>Last Update:</strong> <span id="lastUpdate">Just now</span></p>
             </div>
             
@@ -34,18 +36,36 @@
                 </div>
                 <div class="stat-item">
                     <span class="stat-value" id="timeElapsed">0</span>
-                    <div class="stat-label">Time (min)</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+            
+            <div class="alert-history">
+                <h3>⚠️ Alert History</h3>
+                <div id="alertsList">
+                    <div class="alert-item safe">✅ Journey started safely</div>
+                </div>
+            </div>
+            
+            <div class="emergency-actions">
+                <h3>🚨 Emergency Actions</h3>
+                <div class="emergency-grid">
+                    <button onclick="callEmergency('100')" class="emergency-btn">🚔 Police (100)</button>
+                    <button onclick="callEmergency('108')" class="emergency-btn">🚑 Ambulance (108)</button>
+                    <button onclick="callEmergency('1091')" class="emergency-btn">👩 Women Helpline (1091)</button>
+                    <button onclick="sendAlert()" class="emergency-btn">📢 Send Alert</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let map, marker;
+        let map, marker, routePath;
         const journeyId = '{{ journey_id }}';
+        let routeHistory = [];
+        let startTime = new Date();
 
         function initMap() {
-            // Default to Pune center
             const puneCenter = { lat: 18.5204, lng: 73.8567 };
             
             map = new google.maps.Map(document.getElementById('trackingMap'), {
@@ -59,17 +79,28 @@
                 map: map,
                 title: 'Current Location',
                 icon: {
-                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                        <svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="15" cy="15" r="12" fill="#4CAF50" stroke="white" stroke-width="3"/>
-                            <text x="15" y="20" text-anchor="middle" fill="white" font-size="16">📍</text>
-                        </svg>
-                    `),
-                    scaledSize: new google.maps.Size(30, 30)
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 12,
+                    fillColor: '#4CAF50',
+                    fillOpacity: 1,
+                    strokeColor: '#ffffff',
+                    strokeWeight: 4
                 }
             });
 
-            // Simulate live tracking updates
+            routePath = new google.maps.Polyline({
+                path: [],
+                geodesic: true,
+                strokeColor: '#00b894',
+                strokeOpacity: 1.0,
+                strokeWeight: 4
+            });
+            routePath.setMap(map);
+
+            // Initialize journey info
+            document.getElementById('startTime').textContent = startTime.toLocaleTimeString();
+            document.getElementById('destination').textContent = 'Tracking destination...';
+            
             simulateTracking();
         }
 
@@ -77,18 +108,99 @@
             let updateCount = 0;
             const interval = setInterval(() => {
                 updateCount++;
-                document.getElementById('lastUpdate').textContent = `${updateCount} min ago`;
-                document.getElementById('timeElapsed').textContent = updateCount;
+                
+                // Update location slightly
+                const newLat = 18.5204 + (Math.random() - 0.5) * 0.01;
+                const newLng = 73.8567 + (Math.random() - 0.5) * 0.01;
+                const newPos = { lat: newLat, lng: newLng };
+                
+                marker.setPosition(newPos);
+                routeHistory.push(newPos);
+                routePath.setPath(routeHistory);
+                
+                // Update stats
+                const elapsed = Math.floor((new Date() - startTime) / 60000) + updateCount;
+                document.getElementById('lastUpdate').textContent = 'Just now';
+                document.getElementById('timeElapsed').textContent = `${elapsed} min`;
                 document.getElementById('distanceTraveled').textContent = (updateCount * 0.1).toFixed(1);
                 document.getElementById('currentSpeed').textContent = Math.floor(Math.random() * 5) + 3;
+                
+                // Add random alerts
+                if (updateCount % 5 === 0) {
+                    addAlert(updateCount > 10 ? 'Route deviation detected' : 'On planned route', updateCount > 10 ? 'warning' : 'safe');
+                }
 
                 if (updateCount > 30) {
                     document.getElementById('journeyStatus').textContent = 'Completed';
+                    addAlert('Journey completed safely', 'safe');
                     clearInterval(interval);
                 }
-            }, 60000); // Update every minute
+            }, 30000);
+        }
+        
+        function addAlert(message, type) {
+            const alertsList = document.getElementById('alertsList');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert-item ${type}`;
+            const icon = type === 'safe' ? '✅' : type === 'warning' ? '⚠️' : '🚨';
+            alertDiv.innerHTML = `${icon} ${message} <small>(${new Date().toLocaleTimeString()})</small>`;
+            alertsList.appendChild(alertDiv);
+        }
+        
+        function callEmergency(number) {
+            if (confirm(`Call emergency number ${number}?`)) {
+                window.location.href = `tel:${number}`;
+            }
+        }
+        
+        function sendAlert() {
+            addAlert('Emergency alert sent to contacts', 'emergency');
+            alert('🚨 Emergency alert sent to all trusted contacts!');
         }
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDLnyrliH2xbgqMq4gWJn5sWloDt8WDehU&callback=initMap"></script>
+    
+    <style>
+        .alert-history {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        .alert-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .alert-item.safe { background: rgba(76, 175, 80, 0.2); color: #4CAF50; }
+        .alert-item.warning { background: rgba(255, 152, 0, 0.2); color: #FF9800; }
+        .alert-item.emergency { background: rgba(244, 67, 54, 0.2); color: #F44336; }
+        .emergency-actions {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        .emergency-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .emergency-btn {
+            background: #e17055;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .emergency-btn:hover {
+            background: #d63031;
+        }
+    </style>
 </body>
 </html>
