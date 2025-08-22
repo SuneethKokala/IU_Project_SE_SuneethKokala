@@ -32,7 +32,7 @@ def emergency_alert():
         account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
         auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
         
-        if account_sid and auth_token:
+        if account_sid and auth_token and account_sid != 'your_twilio_account_sid_here':
             client = Client(account_sid, auth_token)
             message = f"🚨 EMERGENCY ALERT 🚨\n\nUser needs help!\n\n📍 Location: https://maps.google.com/?q={lat},{lng}\n\nTime: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
             
@@ -41,8 +41,11 @@ def emergency_alert():
                 from_='whatsapp:+14155238886',
                 to='whatsapp:+919902480636'
             )
-    except:
-        pass
+            print("Debug: Emergency WhatsApp sent")
+        else:
+            print("Debug: Emergency - Twilio credentials not configured")
+    except Exception as e:
+        print(f"Debug: Emergency Twilio error: {e}")
     
     return jsonify({
         'status': 'Emergency alert sent',
@@ -112,7 +115,10 @@ def start_journey():
         account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
         auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
         
-        if account_sid and auth_token:
+        print(f"Debug: Account SID exists: {bool(account_sid)}")
+        print(f"Debug: Auth Token exists: {bool(auth_token)}")
+        
+        if account_sid and auth_token and account_sid != 'your_twilio_account_sid_here':
             client = Client(account_sid, auth_token)
             for contact in data.get('trusted_contacts', []):
                 message = f"🚀 {data.get('user_id', 'User')} started a journey\n\n📍 Track live: {request.host_url}track/{journey_id}\n\nYou'll get updates if they need help."
@@ -122,10 +128,13 @@ def start_journey():
                         from_='whatsapp:+14155238886',
                         to=f'whatsapp:{contact}'
                     )
-                except:
-                    pass
-    except:
-        pass
+                    print(f"Debug: WhatsApp sent to {contact}")
+                except Exception as e:
+                    print(f"Debug: WhatsApp failed to {contact}: {e}")
+        else:
+            print("Debug: Twilio credentials not configured")
+    except Exception as e:
+        print(f"Debug: Twilio error: {e}")
     
     return jsonify({
         'journey_id': journey_id,
