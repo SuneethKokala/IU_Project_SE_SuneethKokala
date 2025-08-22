@@ -62,19 +62,43 @@ def ai_route_optimization():
     return jsonify({
         'routes': [
             {
-                'type': 'direct',
-                'name': 'Direct Route',
+                'type': 'safest',
+                'name': 'Safest Route (via Police Station)',
                 'analysis': {
-                    'safety_score': 85,
-                    'lighting_score': 75,
-                    'crime_risk': 25,
-                    'features': ['Well-lit streets', 'Police station nearby'],
+                    'safety_score': 95,
+                    'lighting_score': 85,
+                    'crime_risk': 15,
+                    'features': ['Police station nearby', 'Well-lit streets', 'CCTV coverage'],
+                    'time': '18 min',
+                    'distance': '1.4 km'
+                }
+            },
+            {
+                'type': 'balanced',
+                'name': 'Balanced Route',
+                'analysis': {
+                    'safety_score': 80,
+                    'lighting_score': 70,
+                    'crime_risk': 30,
+                    'features': ['Commercial area', 'Good lighting'],
                     'time': '15 min',
                     'distance': '1.2 km'
                 }
+            },
+            {
+                'type': 'fastest',
+                'name': 'Fastest Route',
+                'analysis': {
+                    'safety_score': 65,
+                    'lighting_score': 60,
+                    'crime_risk': 45,
+                    'features': ['Direct path', 'Less crowded'],
+                    'time': '12 min',
+                    'distance': '1.0 km'
+                }
             }
         ],
-        'recommendation': 'Direct Route'
+        'recommendation': 'Safest Route (via Police Station)'
     })
 
 if __name__ == '__main__':
