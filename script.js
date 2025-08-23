@@ -10,12 +10,12 @@
         let routeAnalyses = [];
         let currentRatings = { safety: 0, lighting: 0, crowd: 0 };
 
-        // Enhanced Pune Safety Database
-        const puneDatabase = {
+        // Enhanced   Safety Database
+        const  Database = {
             safeZones: [
                 // Major Police Stations
                 {lat: 18.5204, lng: 73.8567, type: 'police', name: 'Pimpri Police Station', safety: 95},
-                {lat: 18.4899, lng: 73.8056, type: 'police', name: 'Pune Cantonment Police', safety: 93},
+                {lat: 18.4899, lng: 73.8056, type: 'police', name: '  Cantonment Police', safety: 93},
                 {lat: 18.5640, lng: 73.7802, type: 'police', name: 'Vishrantwadi Police Station', safety: 92},
                 {lat: 18.4574, lng: 73.8077, type: 'police', name: 'Koregaon Park Police Station', safety: 94},
                 {lat: 18.5089, lng: 73.8553, type: 'police', name: 'Camp Police Station', safety: 91},
@@ -42,17 +42,17 @@
                 {lat: 18.5804, lng: 73.8467, type: 'hotspot', name: 'Remote Area - Kharadi', danger: 82, incidents: 15, issues: ['Remote location', 'Limited CCTV', 'Dark alleys']},
                 {lat: 18.4404, lng: 73.8200, type: 'hotspot', name: 'Highway Stretch - Kondhwa', danger: 88, incidents: 20, issues: ['Isolated highway', 'Limited help', 'Poor street lighting']},
                 {lat: 18.5500, lng: 73.7900, type: 'hotspot', name: 'Underpass - Aundh', danger: 92, incidents: 25, issues: ['Dark underpass', 'Echo chamber', 'Limited visibility']},
-                {lat: 18.4800, lng: 73.8800, type: 'hotspot', name: 'Old Pune Area - Narrow lanes', danger: 95, incidents: 30, issues: ['Narrow lanes', 'Old buildings', 'Poor lighting']}
+                {lat: 18.4800, lng: 73.8800, type: 'hotspot', name: 'Old   Area - Narrow lanes', danger: 95, incidents: 30, issues: ['Narrow lanes', 'Old buildings', 'Poor lighting']}
             ]
         };
 
         // Initialize Map with Satellite View
         function initMap() {
-            const puneCenter = { lat: 18.5204, lng: 73.8567 };
+            const  Center = { lat: 18.5204, lng: 73.8567 };
             
             map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 13,
-                center: puneCenter,
+                center:  Center,
                 mapTypeId: google.maps.MapTypeId.HYBRID,
  // Satellite view for better visual appeal
                 mapTypeControl: false,
@@ -193,7 +193,7 @@ async function emergencyAlert() {
                     map.setZoom(14);
                 }, (error) => {
                     userLocation = { lat: 18.5204, lng: 73.8567 };
-                    showAlert('Location Access', 'Enable location access for personalized route recommendations. Using Pune city center as default.');
+                    showAlert('Location Access', 'Enable location access for personalized route recommendations. Using   city center as default.');
                 });
             } else {
                 userLocation = { lat: 18.5204, lng: 73.8567 };
@@ -201,7 +201,7 @@ async function emergencyAlert() {
         }
 
         function initializeSafetyZones() {
-            puneDatabase.safeZones.forEach(zone => {
+             Database.safeZones.forEach(zone => {
                 const marker = new google.maps.Marker({
                     position: { lat: zone.lat, lng: zone.lng },
                     map: null,
@@ -221,7 +221,7 @@ async function emergencyAlert() {
                 safetyMarkers.push({ marker, infoWindow, zone, type: 'safe' });
             });
 
-            puneDatabase.crimeHotspots.forEach(hotspot => {
+             Database.crimeHotspots.forEach(hotspot => {
                 const marker = new google.maps.Marker({
                     position: { lat: hotspot.lat, lng: hotspot.lng },
                     map: null,
@@ -392,12 +392,12 @@ async function emergencyAlert() {
         function findRoutesFromSearch() {
             const destInput = document.getElementById('destinationInput').value;
             if (!destInput.trim()) {
-                showAlert('Destination Required', 'Please enter a destination in Pune to find safe routes.');
+                showAlert('Destination Required', 'Please enter a destination in   to find safe routes.');
                 return;
             }
 
             geocoder.geocode({ 
-                address: destInput + ', Pune, Maharashtra, India' 
+                address: destInput + ',  , Maharashtra, India' 
             }, (results, status) => {
                 if (status === 'OK' && results[0]) {
                     destination = {
@@ -427,7 +427,7 @@ async function emergencyAlert() {
 
                     findSafeRoutes();
                 } else {
-                    showAlert('Location Error', 'Could not find the specified location in Pune. Please try a different address or landmark.');
+                    showAlert('Location Error', 'Could not find the specified location in  . Please try a different address or landmark.');
                 }
             });
         }
@@ -567,7 +567,7 @@ async function emergencyAlert() {
                 let pointLighting = baseLighting;
                 let pointCrime = baseCrime;
                 
-                puneDatabase.safeZones.forEach(zone => {
+                 Database.safeZones.forEach(zone => {
                     const distance = calculateDistance(
                         {lat: point.lat(), lng: point.lng()},
                         {lat: zone.lat, lng: zone.lng}
@@ -592,7 +592,7 @@ async function emergencyAlert() {
                     }
                 });
                 
-                puneDatabase.crimeHotspots.forEach(hotspot => {
+                 Database.crimeHotspots.forEach(hotspot => {
                     const distance = calculateDistance(
                         {lat: point.lat(), lng: point.lng()},
                         {lat: hotspot.lat, lng: hotspot.lng}
@@ -821,12 +821,12 @@ function submitIncident(e) {
         location,
         details,
         timestamp: new Date().toISOString(),
-        city: 'Pune'
+        city: ' '
     };
     closeIncidentModal();
     showAlert(
         'Incident Reported',
-        `✅ Thank you for reporting: "<b>${type}</b>".<br>Location: <b>${location}</b><br>Your report helps make Pune safer!`
+        `✅ Thank you for reporting: "<b>${type}</b>".<br>Location: <b>${location}</b><br>Your report helps make   safer!`
     );
     console.log('Incident reported:', incidentData);
 }
@@ -844,7 +844,7 @@ window.submitIncident = submitIncident;
             
             const shareData = {
                 title: '📍 My Current Location - SafeRoute',
-                text: 'Sharing my live location for safety tracking via SafeRoute Pune',
+                text: 'Sharing my live location for safety tracking via SafeRoute  ',
                 url: `https://maps.google.com/?q=${userLocation.lat},${userLocation.lng}`
             };
             
@@ -941,12 +941,12 @@ window.submitIncident = submitIncident;
                 ratings: { safety, lighting, crowd },
                 comment: comment,
                 timestamp: new Date().toISOString(),
-                city: 'Pune',
+                city: ' ',
                 userId: 'anonymous'
             };
             
             console.log('Review submitted:', reviewData);
-            showAlert('Review Submitted', '⭐ Thank you for your valuable feedback! Your review helps make Pune safer for all women.');
+            showAlert('Review Submitted', '⭐ Thank you for your valuable feedback! Your review helps make   safer for all women.');
             closeReviewModal();
         }
 

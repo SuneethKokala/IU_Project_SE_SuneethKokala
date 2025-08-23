@@ -12,24 +12,10 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Pune Safety Database
-PUNE_DATABASE = {
-    'safe_zones': [
-        {'lat': 18.5204, 'lng': 73.8567, 'type': 'police', 'name': 'Pimpri Police Station', 'safety': 95},
-        {'lat': 18.4899, 'lng': 73.8056, 'type': 'police', 'name': 'Pune Cantonment Police', 'safety': 93},
-        {'lat': 18.5640, 'lng': 73.7802, 'type': 'police', 'name': 'Vishrantwadi Police Station', 'safety': 92},
-        {'lat': 18.4574, 'lng': 73.8077, 'type': 'police', 'name': 'Koregaon Park Police Station', 'safety': 94},
-        {'lat': 18.5104, 'lng': 73.8467, 'type': 'hospital', 'name': 'KEM Hospital', 'safety': 90},
-        {'lat': 18.5304, 'lng': 73.8367, 'type': 'hospital', 'name': 'Ruby Hall Clinic', 'safety': 88},
-        {'lat': 18.5404, 'lng': 73.8767, 'type': 'commercial', 'name': 'Phoenix MarketCity', 'safety': 85},
-        {'lat': 18.5604, 'lng': 73.7767, 'type': 'commercial', 'name': 'Amanora Mall', 'safety': 82},
-    ],
-    'crime_hotspots': [
-        {'lat': 18.5004, 'lng': 73.8667, 'type': 'hotspot', 'name': 'Industrial Area - Poorly Lit', 'danger': 85, 'incidents': 12},
-        {'lat': 18.4704, 'lng': 73.8567, 'type': 'hotspot', 'name': 'Under Construction Zone - Hadapsar', 'danger': 78, 'incidents': 8},
-        {'lat': 18.5804, 'lng': 73.8467, 'type': 'hotspot', 'name': 'Remote Area - Kharadi', 'danger': 82, 'incidents': 15},
-        {'lat': 18.4404, 'lng': 73.8200, 'type': 'hotspot', 'name': 'Highway Stretch - Kondhwa', 'danger': 88, 'incidents': 20},
-    ]
+# Mock Safety Database
+MOCK_DATABASE = {
+    'safe_zones': [],
+    'crime_hotspots': []
 }
 
 def calculate_distance(lat1, lng1, lat2, lng2):
@@ -78,29 +64,16 @@ def analyze_route_safety(start_lat, start_lng, end_lat, end_lng):
         safety_score -= 10
         features.append('🚶 Low crowd density - isolated area')
     
-    # Check proximity to safe zones
-    for zone in PUNE_DATABASE['safe_zones']:
-        distance = calculate_distance(start_lat, start_lng, zone['lat'], zone['lng'])
-        if distance < 1000:
-            safety_score += zone['safety'] * 0.1
-            if distance < 500:
-                help_points += 1
-                if zone['type'] == 'police':
-                    features.append('👮♀️ Police stations within reach')
-                elif zone['type'] == 'hospital':
-                    features.append('🏥 Medical facilities nearby')
-                elif zone['type'] == 'commercial':
-                    features.append('🏢 Populated commercial areas')
+    # Mock safety zone check
+    safety_score += 10
+    help_points += 1
+    features.append('👮♀️ Safe area detected')
     
-    # Check proximity to crime hotspots with AI enhancement
-    for hotspot in PUNE_DATABASE['crime_hotspots']:
-        distance = calculate_distance(start_lat, start_lng, hotspot['lat'], hotspot['lng'])
-        if distance < 700:
-            # AI-enhanced crime risk calculation
-            enhanced_danger = hotspot['danger'] * (ai_crime_risk / 50)
-            safety_score -= enhanced_danger * 0.2
-            if distance < 300:
-                features.append('⚠️ AI Alert: High crime risk area')
+    # Mock crime hotspot check
+    if ai_crime_risk > 60:
+        features.append('⚠️ Exercise caution in this area')
+    else:
+        features.append('✅ Low crime risk area')
     
     # Time-based adjustment with AI
     hour = datetime.now().hour
@@ -142,7 +115,7 @@ def index():
 
 @app.route('/api/safety-zones')
 def get_safety_zones():
-    return jsonify(PUNE_DATABASE)
+    return jsonify(MOCK_DATABASE)
 
 @app.route('/api/analyze-route', methods=['POST'])
 def analyze_route():
@@ -362,27 +335,37 @@ def ai_route_optimization():
         'waypoints': []
     })
     
-    # Safe route (via police stations)
-    safe_waypoint = PUNE_DATABASE['safe_zones'][0]  # Nearest police station
-    safe_analysis = analyze_route_safety(start_lat, start_lng, safe_waypoint['lat'], safe_waypoint['lng'])
+    # Safe route (enhanced safety)
+    safe_analysis = {
+        'safety_score': 95,
+        'lighting_score': 85,
+        'crime_risk': 15,
+        'help_points': 3,
+        'features': ['Police station nearby', 'Well-lit streets', 'CCTV coverage'],
+        'distance': '1.4 km',
+        'time': '18 min'
+    }
     routes.append({
         'type': 'safe',
         'name': 'Safest Route (via Police Station)',
-        'analysis': safe_analysis,
-        'waypoints': [safe_waypoint]
+        'analysis': safe_analysis
     })
     
-    # Commercial route (via malls/commercial areas)
-    commercial_zones = [z for z in PUNE_DATABASE['safe_zones'] if z['type'] == 'commercial']
-    if commercial_zones:
-        commercial_waypoint = commercial_zones[0]
-        commercial_analysis = analyze_route_safety(start_lat, start_lng, commercial_waypoint['lat'], commercial_waypoint['lng'])
-        routes.append({
-            'type': 'commercial',
-            'name': 'Well-lit Commercial Route',
-            'analysis': commercial_analysis,
-            'waypoints': [commercial_waypoint]
-        })
+    # Balanced route
+    balanced_analysis = {
+        'safety_score': 80,
+        'lighting_score': 70,
+        'crime_risk': 30,
+        'help_points': 2,
+        'features': ['Commercial area', 'Good lighting'],
+        'distance': '1.2 km',
+        'time': '15 min'
+    }
+    routes.append({
+        'type': 'balanced',
+        'name': 'Balanced Route',
+        'analysis': balanced_analysis
+    })
     
     # Sort routes by safety score
     routes.sort(key=lambda x: x['analysis']['safety_score'], reverse=True)
@@ -397,12 +380,12 @@ def ai_route_optimization():
 @app.route('/api/ai-dashboard')
 def ai_dashboard():
     """Get AI analytics dashboard data"""
-    # Sample locations in Pune for demonstration
+    # Sample locations for demonstration
     sample_locations = [
-        {'lat': 18.5204, 'lng': 73.8567, 'name': 'Pimpri'},
-        {'lat': 18.4899, 'lng': 73.8056, 'name': 'Cantonment'},
-        {'lat': 18.5640, 'lng': 73.7802, 'name': 'Vishrantwadi'},
-        {'lat': 18.4574, 'lng': 73.8077, 'name': 'Koregaon Park'}
+        {'lat': 52.5200, 'lng': 13.4050, 'name': 'City Center'},
+        {'lat': 52.5170, 'lng': 13.3888, 'name': 'Commercial District'},
+        {'lat': 52.5244, 'lng': 13.4105, 'name': 'Residential Area'},
+        {'lat': 52.5067, 'lng': 13.4282, 'name': 'Business Quarter'}
     ]
     
     dashboard_data = []
@@ -420,7 +403,7 @@ def ai_dashboard():
     
     return jsonify({
         'areas': dashboard_data,
-        'city': 'Pune',
+        'city': 'Current Location',
         'last_updated': datetime.now().isoformat(),
         'ai_model_status': 'active'
     })
