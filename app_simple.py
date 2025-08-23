@@ -68,35 +68,35 @@ def emergency_alert():
 @app.route('/api/report-incident', methods=['POST'])
 def report_incident():
     data = request.json
-    try:
-        incident_id = add_incident(
-            data.get('type'),
-            data.get('location'),
-            data.get('details'),
-            data.get('lat'),
-            data.get('lng')
-        )
-        return jsonify({'status': 'Incident reported successfully', 'id': incident_id})
-    except Exception as e:
-        print(f"Database error: {e}")
-        return jsonify({'status': 'Incident reported successfully'})
+    incident_id = add_incident(
+        data.get('type'),
+        data.get('location'),
+        data.get('details'),
+        data.get('lat'),
+        data.get('lng')
+    )
+    
+    if incident_id:
+        return jsonify({'status': 'Incident reported and saved to database', 'id': incident_id})
+    else:
+        return jsonify({'status': 'Incident reported (database unavailable)', 'id': None})
 
 @app.route('/api/submit-review', methods=['POST'])
 def submit_review():
     data = request.json
-    try:
-        review_id = add_review(
-            data.get('safety_rating', 4),
-            data.get('lighting_rating', 3),
-            data.get('crowd_rating', 4),
-            data.get('comment', 'Good route overall'),
-            data.get('lat'),
-            data.get('lng')
-        )
-        return jsonify({'status': 'Review submitted successfully', 'id': review_id})
-    except Exception as e:
-        print(f"Database error: {e}")
-        return jsonify({'status': 'Review submitted successfully'})
+    review_id = add_review(
+        data.get('safety_rating', 4),
+        data.get('lighting_rating', 3),
+        data.get('crowd_rating', 4),
+        data.get('comment', 'Good route overall'),
+        data.get('lat'),
+        data.get('lng')
+    )
+    
+    if review_id:
+        return jsonify({'status': 'Review submitted and saved to database', 'id': review_id})
+    else:
+        return jsonify({'status': 'Review submitted (database unavailable)', 'id': None})
 
 @app.route('/api/ai-route-optimization', methods=['POST'])
 def ai_route_optimization():
@@ -176,22 +176,20 @@ def start_journey():
         print(f"Debug: Twilio error: {e}")
     
     # Save journey to database
-    try:
-        add_journey(
-            journey_id,
-            data.get('user_id', 'User'),
-            data.get('start_location', {}).get('lat'),
-            data.get('start_location', {}).get('lng'),
-            data.get('destination', {}).get('name', ''),
-            data.get('trusted_contacts', [])
-        )
-    except Exception as e:
-        print(f"Database error: {e}")
+    journey_saved = add_journey(
+        journey_id,
+        data.get('user_id', 'User'),
+        data.get('start_location', {}).get('lat'),
+        data.get('start_location', {}).get('lng'),
+        data.get('destination', {}).get('name', ''),
+        data.get('trusted_contacts', [])
+    )
     
     return jsonify({
         'journey_id': journey_id,
         'tracking_url': f'/track/{journey_id}',
-        'contacts_notified': len(data.get('trusted_contacts', []))
+        'contacts_notified': len(data.get('trusted_contacts', [])),
+        'database_saved': bool(journey_saved)
     })
 
 @app.route('/api/update-location', methods=['POST'])
@@ -217,18 +215,26 @@ def get_reports():
 
 @app.route('/api/debug/database', methods=['GET'])
 def debug_database():
+    debug_info = {
+        'supabase_url_set': bool(os.environ.get('SUPABASE_URL')) and os.environ.get('SUPABASE_URL') != 'your_supabase_url_here',
+        'supabase_key_set': bool(os.environ.get('SUPABASE_ANON_KEY')) and os.environ.get('SUPABASE_ANON_KEY') != 'your_supabase_anon_key_here',
+        'database_status': 'unknown'
+    }
+    
     try:
         incidents = get_incidents()
-        return jsonify({
+        debug_info.update({
             'incidents_count': len(incidents),
-            'recent_incidents': incidents[:5],
+            'recent_incidents': incidents[:3],
             'database_status': 'connected'
         })
     except Exception as e:
-        return jsonify({
+        debug_info.update({
             'error': str(e),
             'database_status': 'error'
         })
+    
+    return jsonify(debug_info)
 
 @app.route('/track/<journey_id>')
 def track_journey(journey_id):
