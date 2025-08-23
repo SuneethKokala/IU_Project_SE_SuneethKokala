@@ -191,6 +191,54 @@
         </div>
     </div>
 
+    <!-- Route Review Modal -->
+    <div class="modal" id="reviewModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('reviewModal')">×</button>
+            <h3>⭐ Review Route</h3>
+            <form onsubmit="submitRouteReview(event)">
+                <div class="form-group">
+                    <label>Safety Rating</label>
+                    <div class="rating-stars">
+                        <span class="star" data-rating="1" onclick="setRating('safety', 1)">⭐</span>
+                        <span class="star" data-rating="2" onclick="setRating('safety', 2)">⭐</span>
+                        <span class="star" data-rating="3" onclick="setRating('safety', 3)">⭐</span>
+                        <span class="star" data-rating="4" onclick="setRating('safety', 4)">⭐</span>
+                        <span class="star" data-rating="5" onclick="setRating('safety', 5)">⭐</span>
+                    </div>
+                    <input type="hidden" id="safetyRating" value="4">
+                </div>
+                <div class="form-group">
+                    <label>Lighting Quality</label>
+                    <div class="rating-stars">
+                        <span class="star" data-rating="1" onclick="setRating('lighting', 1)">💡</span>
+                        <span class="star" data-rating="2" onclick="setRating('lighting', 2)">💡</span>
+                        <span class="star" data-rating="3" onclick="setRating('lighting', 3)">💡</span>
+                        <span class="star" data-rating="4" onclick="setRating('lighting', 4)">💡</span>
+                        <span class="star" data-rating="5" onclick="setRating('lighting', 5)">💡</span>
+                    </div>
+                    <input type="hidden" id="lightingRating" value="3">
+                </div>
+                <div class="form-group">
+                    <label>Crowd Level</label>
+                    <div class="rating-stars">
+                        <span class="star" data-rating="1" onclick="setRating('crowd', 1)">👥</span>
+                        <span class="star" data-rating="2" onclick="setRating('crowd', 2)">👥</span>
+                        <span class="star" data-rating="3" onclick="setRating('crowd', 3)">👥</span>
+                        <span class="star" data-rating="4" onclick="setRating('crowd', 4)">👥</span>
+                        <span class="star" data-rating="5" onclick="setRating('crowd', 5)">👥</span>
+                    </div>
+                    <input type="hidden" id="crowdRating" value="4">
+                </div>
+                <div class="form-group">
+                    <label>Comments</label>
+                    <textarea id="reviewComment" placeholder="Share your experience with this route..." style="width: 100%; padding: 12px; border: 2px solid #ff6b6b; border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white; min-height: 80px;"></textarea>
+                </div>
+                <button type="submit" class="find-routes-btn">Submit Review</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         let map, directionsService, directionsRenderer, geocoder;
         let userLocation = null;
@@ -661,12 +709,29 @@
             });
         }
 
-        async function submitReview() {
+        function submitReview() {
+            document.getElementById('reviewModal').classList.add('show');
+        }
+
+        function setRating(type, rating) {
+            document.getElementById(type + 'Rating').value = rating;
+            
+            // Update visual stars
+            const container = event.target.parentElement;
+            const stars = container.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                star.classList.toggle('active', index < rating);
+            });
+        }
+
+        async function submitRouteReview(event) {
+            event.preventDefault();
+            
             const reviewData = {
-                safety_rating: 4,
-                lighting_rating: 3,
-                crowd_rating: 4,
-                comment: 'Good route overall'
+                safety_rating: parseInt(document.getElementById('safetyRating').value),
+                lighting_rating: parseInt(document.getElementById('lightingRating').value),
+                crowd_rating: parseInt(document.getElementById('crowdRating').value),
+                comment: document.getElementById('reviewComment').value
             };
 
             try {
@@ -678,8 +743,10 @@
 
                 const result = await response.json();
                 alert('⭐ Review submitted successfully! Thank you for your feedback.');
+                closeModal('reviewModal');
             } catch (error) {
                 alert('⭐ Review submitted successfully!');
+                closeModal('reviewModal');
             }
         }
 
@@ -1075,6 +1142,24 @@
             cursor: pointer;
             font-weight: bold;
             width: 100%;
+        }
+        
+        .rating-stars {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .star {
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0.3;
+            transition: opacity 0.2s;
+        }
+        
+        .star:hover,
+        .star.active {
+            opacity: 1;
         }
     </style>
 </body>
