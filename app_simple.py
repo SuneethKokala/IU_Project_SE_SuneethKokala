@@ -215,6 +215,21 @@ def get_reports():
         print(f"Database error: {e}")
         return jsonify([])
 
+@app.route('/api/debug/database', methods=['GET'])
+def debug_database():
+    try:
+        incidents = get_incidents()
+        return jsonify({
+            'incidents_count': len(incidents),
+            'recent_incidents': incidents[:5],
+            'database_status': 'connected'
+        })
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'database_status': 'error'
+        })
+
 @app.route('/track/<journey_id>')
 def track_journey(journey_id):
     return render_template('track.html', journey_id=journey_id)
