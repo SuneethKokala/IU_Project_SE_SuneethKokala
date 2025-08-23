@@ -1,7 +1,11 @@
 from flask import Flask, render_template, request, jsonify
 import os
 from datetime import datetime
+from dotenv import load_dotenv
 from database import init_db, add_incident, add_review, add_journey, get_incidents
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 
