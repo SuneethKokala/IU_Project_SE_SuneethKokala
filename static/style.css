@@ -117,7 +117,9 @@ body {
 }
 
 .find-routes-btn {
-    background: transparent;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
     color: white;
     border: 2px solid white;
     padding: 18px 35px;
@@ -126,7 +128,7 @@ body {
     font-weight: bold;
     width: 100%;
     transition: all 0.4s ease;
-    box-shadow: none;
+    box-shadow: none !important;
     position: relative;
     overflow: hidden;
     text-transform: uppercase;
@@ -522,4 +524,14 @@ body {
     .insights-grid {
         grid-template-columns: 1fr 1fr;
     }
+}
+
+/* Final override for Find Safest Routes button */
+button.find-routes-btn,
+.find-routes-btn {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    border: 2px solid white !important;
 }
