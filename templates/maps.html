@@ -11,6 +11,7 @@
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="SafeRoute - Women's Safety Navigation">
     <meta name="twitter:description" content="AI-powered women's safety navigation app with real-time route analysis and emergency features">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -1114,43 +1115,73 @@
     
     <script>
         // Three.js 3D Background
-        let scene, camera, renderer, particles;
+        let scene, camera, renderer, particles, particles2, time = 0;
         
         function initThreeJS() {
             const canvas = document.getElementById('threejs-bg');
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setClearColor(0x000000, 0);
             
-            // Create floating particles
-            const geometry = new THREE.BufferGeometry();
-            const positions = [];
-            const colors = [];
+            // Create main floating particles
+            const geometry1 = new THREE.BufferGeometry();
+            const positions1 = [];
+            const colors1 = [];
             
-            for (let i = 0; i < 1000; i++) {
-                positions.push((Math.random() - 0.5) * 2000);
-                positions.push((Math.random() - 0.5) * 2000);
-                positions.push((Math.random() - 0.5) * 2000);
+            for (let i = 0; i < 1500; i++) {
+                positions1.push((Math.random() - 0.5) * 3000);
+                positions1.push((Math.random() - 0.5) * 3000);
+                positions1.push((Math.random() - 0.5) * 3000);
                 
-                colors.push(0.8 + Math.random() * 0.2);
-                colors.push(0.4 + Math.random() * 0.4);
-                colors.push(0.9 + Math.random() * 0.1);
+                colors1.push(0.9 + Math.random() * 0.1);
+                colors1.push(0.3 + Math.random() * 0.5);
+                colors1.push(0.95 + Math.random() * 0.05);
             }
             
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geometry1.setAttribute('position', new THREE.Float32BufferAttribute(positions1, 3));
+            geometry1.setAttribute('color', new THREE.Float32BufferAttribute(colors1, 3));
             
-            const material = new THREE.PointsMaterial({
-                size: 3,
+            const material1 = new THREE.PointsMaterial({
+                size: 4,
                 vertexColors: true,
                 transparent: true,
-                opacity: 0.6
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
             });
             
-            particles = new THREE.Points(geometry, material);
+            particles = new THREE.Points(geometry1, material1);
             scene.add(particles);
+            
+            // Create secondary particle system
+            const geometry2 = new THREE.BufferGeometry();
+            const positions2 = [];
+            const colors2 = [];
+            
+            for (let i = 0; i < 800; i++) {
+                positions2.push((Math.random() - 0.5) * 2500);
+                positions2.push((Math.random() - 0.5) * 2500);
+                positions2.push((Math.random() - 0.5) * 2500);
+                
+                colors2.push(0.4 + Math.random() * 0.3);
+                colors2.push(0.7 + Math.random() * 0.3);
+                colors2.push(1.0);
+            }
+            
+            geometry2.setAttribute('position', new THREE.Float32BufferAttribute(positions2, 3));
+            geometry2.setAttribute('color', new THREE.Float32BufferAttribute(colors2, 3));
+            
+            const material2 = new THREE.PointsMaterial({
+                size: 2,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+            
+            particles2 = new THREE.Points(geometry2, material2);
+            scene.add(particles2);
             
             camera.position.z = 1000;
             
@@ -1159,9 +1190,26 @@
         
         function animate() {
             requestAnimationFrame(animate);
+            time += 0.01;
             
-            particles.rotation.x += 0.0005;
-            particles.rotation.y += 0.001;
+            // Animate main particles
+            particles.rotation.x += 0.0008;
+            particles.rotation.y += 0.0012;
+            particles.rotation.z += 0.0005;
+            
+            // Animate secondary particles
+            particles2.rotation.x -= 0.0006;
+            particles2.rotation.y += 0.0015;
+            particles2.rotation.z -= 0.0008;
+            
+            // Add floating motion
+            particles.position.y = Math.sin(time * 0.5) * 50;
+            particles2.position.y = Math.cos(time * 0.7) * 30;
+            
+            // Pulsing effect
+            const scale = 1 + Math.sin(time * 2) * 0.1;
+            particles.scale.setScalar(scale);
+            particles2.scale.setScalar(1.2 - scale * 0.2);
             
             renderer.render(scene, camera);
         }
