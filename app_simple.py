@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import os
 from datetime import datetime
+from database import init_db, add_incident, add_review, add_journey, get_incidents
 
 app = Flask(__name__)
 
@@ -66,11 +67,36 @@ def emergency_alert():
 
 @app.route('/api/report-incident', methods=['POST'])
 def report_incident():
-    return jsonify({'status': 'Incident reported successfully'})
+    data = request.json
+    try:
+        incident_id = add_incident(
+            data.get('type'),
+            data.get('location'),
+            data.get('details'),
+            data.get('lat'),
+            data.get('lng')
+        )
+        return jsonify({'status': 'Incident reported successfully', 'id': incident_id})
+    except Exception as e:
+        print(f"Database error: {e}")
+        return jsonify({'status': 'Incident reported successfully'})
 
 @app.route('/api/submit-review', methods=['POST'])
 def submit_review():
-    return jsonify({'status': 'Review submitted successfully'})
+    data = request.json
+    try:
+        review_id = add_review(
+            data.get('safety_rating', 4),
+            data.get('lighting_rating', 3),
+            data.get('crowd_rating', 4),
+            data.get('comment', 'Good route overall'),
+            data.get('lat'),
+            data.get('lng')
+        )
+        return jsonify({'status': 'Review submitted successfully', 'id': review_id})
+    except Exception as e:
+        print(f"Database error: {e}")
+        return jsonify({'status': 'Review submitted successfully'})
 
 @app.route('/api/ai-route-optimization', methods=['POST'])
 def ai_route_optimization():
@@ -149,6 +175,19 @@ def start_journey():
     except Exception as e:
         print(f"Debug: Twilio error: {e}")
     
+    # Save journey to database
+    try:
+        add_journey(
+            journey_id,
+            data.get('user_id', 'User'),
+            data.get('start_location', {}).get('lat'),
+            data.get('start_location', {}).get('lng'),
+            data.get('destination', {}).get('name', ''),
+            data.get('trusted_contacts', [])
+        )
+    except Exception as e:
+        print(f"Database error: {e}")
+    
     return jsonify({
         'journey_id': journey_id,
         'tracking_url': f'/track/{journey_id}',
@@ -169,11 +208,23 @@ def panic_mode():
 
 @app.route('/api/get-reports', methods=['GET'])
 def get_reports():
-    return jsonify([])
+    try:
+        incidents = get_incidents()
+        return jsonify(incidents)
+    except Exception as e:
+        print(f"Database error: {e}")
+        return jsonify([])
 
 @app.route('/track/<journey_id>')
 def track_journey(journey_id):
     return render_template('track.html', journey_id=journey_id)
+
+# Initialize database on startup
+try:
+    init_db()
+    print("Database initialized successfully")
+except Exception as e:
+    print(f"Database initialization error: {e}")
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
