@@ -87,10 +87,28 @@ body {
 .form-group select {
     width: 100%;
     padding: 12px;
-    border: 2px solid white;
+    border: 2px solid white !important;
     border-radius: 10px;
     background: rgba(0, 123, 255, 0.1);
     color: white;
+    outline: none !important;
+}
+
+.form-group select:focus {
+    border: 2px solid white !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#travelMode {
+    border: 2px solid white !important;
+    outline: none !important;
+}
+
+#travelMode:focus {
+    border: 2px solid white !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 .form-group select option {
