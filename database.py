@@ -1,138 +1,81 @@
 import os
-import psycopg2
+from supabase import create_client, Client
 from datetime import datetime
 
-def get_db_connection():
-    """Get database connection using Vercel Postgres"""
-    return psycopg2.connect(os.environ.get('POSTGRES_URL'))
+def get_supabase_client():
+    """Get Supabase client"""
+    url = os.environ.get('SUPABASE_URL')
+    key = os.environ.get('SUPABASE_ANON_KEY')
+    return create_client(url, key)
 
 def init_db():
-    """Initialize database tables"""
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    # Create incidents table
-    cur.execute('''
-        CREATE TABLE IF NOT EXISTS incidents (
-            id SERIAL PRIMARY KEY,
-            type VARCHAR(50) NOT NULL,
-            location VARCHAR(255) NOT NULL,
-            details TEXT,
-            lat DECIMAL(10, 8),
-            lng DECIMAL(11, 8),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
-    # Create reviews table
-    cur.execute('''
-        CREATE TABLE IF NOT EXISTS reviews (
-            id SERIAL PRIMARY KEY,
-            safety_rating INTEGER NOT NULL,
-            lighting_rating INTEGER NOT NULL,
-            crowd_rating INTEGER NOT NULL,
-            comment TEXT,
-            lat DECIMAL(10, 8),
-            lng DECIMAL(11, 8),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
-    # Create journeys table
-    cur.execute('''
-        CREATE TABLE IF NOT EXISTS journeys (
-            id SERIAL PRIMARY KEY,
-            journey_id VARCHAR(100) UNIQUE NOT NULL,
-            user_name VARCHAR(100) NOT NULL,
-            start_lat DECIMAL(10, 8),
-            start_lng DECIMAL(11, 8),
-            destination VARCHAR(255),
-            trusted_contacts TEXT,
-            status VARCHAR(20) DEFAULT 'active',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
-    conn.commit()
-    cur.close()
-    conn.close()
+    """Initialize database - Supabase tables created via dashboard"""
+    # Tables created via Supabase dashboard SQL editor:
+    # incidents, reviews, journeys
+    pass
 
 def add_incident(incident_type, location, details, lat=None, lng=None):
     """Add incident to database"""
-    conn = get_db_connection()
-    cur = conn.cursor()
+    supabase = get_supabase_client()
     
-    cur.execute('''
-        INSERT INTO incidents (type, location, details, lat, lng)
-        VALUES (%s, %s, %s, %s, %s)
-        RETURNING id
-    ''', (incident_type, location, details, lat, lng))
+    data = {
+        'type': incident_type,
+        'location': location,
+        'details': details,
+        'lat': lat,
+        'lng': lng
+    }
     
-    incident_id = cur.fetchone()[0]
-    conn.commit()
-    cur.close()
-    conn.close()
-    return incident_id
+    result = supabase.table('incidents').insert(data).execute()
+    return result.data[0]['id'] if result.data else None
 
 def add_review(safety_rating, lighting_rating, crowd_rating, comment, lat=None, lng=None):
     """Add review to database"""
-    conn = get_db_connection()
-    cur = conn.cursor()
+    supabase = get_supabase_client()
     
-    cur.execute('''
-        INSERT INTO reviews (safety_rating, lighting_rating, crowd_rating, comment, lat, lng)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        RETURNING id
-    ''', (safety_rating, lighting_rating, crowd_rating, comment, lat, lng))
+    data = {
+        'safety_rating': safety_rating,
+        'lighting_rating': lighting_rating,
+        'crowd_rating': crowd_rating,
+        'comment': comment,
+        'lat': lat,
+        'lng': lng
+    }
     
-    review_id = cur.fetchone()[0]
-    conn.commit()
-    cur.close()
-    conn.close()
-    return review_id
+    result = supabase.table('reviews').insert(data).execute()
+    return result.data[0]['id'] if result.data else None
 
 def add_journey(journey_id, user_name, start_lat, start_lng, destination, trusted_contacts):
     """Add journey to database"""
-    conn = get_db_connection()
-    cur = conn.cursor()
+    supabase = get_supabase_client()
     
-    contacts_str = ','.join(trusted_contacts) if trusted_contacts else ''
+    data = {
+        'journey_id': journey_id,
+        'user_name': user_name,
+        'start_lat': start_lat,
+        'start_lng': start_lng,
+        'destination': destination,
+        'trusted_contacts': ','.join(trusted_contacts) if trusted_contacts else ''
+    }
     
-    cur.execute('''
-        INSERT INTO journeys (journey_id, user_name, start_lat, start_lng, destination, trusted_contacts)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        RETURNING id
-    ''', (journey_id, user_name, start_lat, start_lng, destination, contacts_str))
-    
-    db_id = cur.fetchone()[0]
-    conn.commit()
-    cur.close()
-    conn.close()
-    return db_id
+    result = supabase.table('journeys').insert(data).execute()
+    return result.data[0]['id'] if result.data else None
 
 def get_incidents():
     """Get all incidents from database"""
-    conn = get_db_connection()
-    cur = conn.cursor()
+    supabase = get_supabase_client()
     
-    cur.execute('''
-        SELECT type, location, details, lat, lng, created_at
-        FROM incidents
-        ORDER BY created_at DESC
-        LIMIT 100
-    ''')
+    result = supabase.table('incidents').select('*').order('created_at', desc=True).limit(100).execute()
     
     incidents = []
-    for row in cur.fetchall():
+    for row in result.data:
         incidents.append({
-            'type': row[0],
-            'location': row[1],
-            'details': row[2],
-            'lat': float(row[3]) if row[3] else None,
-            'lng': float(row[4]) if row[4] else None,
-            'timestamp': row[5].isoformat() if row[5] else None
+            'type': row['type'],
+            'location': row['location'],
+            'details': row['details'],
+            'lat': row['lat'],
+            'lng': row['lng'],
+            'timestamp': row['created_at']
         })
     
-    cur.close()
-    conn.close()
     return incidents
