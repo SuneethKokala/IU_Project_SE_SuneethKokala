@@ -155,7 +155,7 @@ body {
 }
 
 .feature-btn {
-    background: transparent;
+    background: none !important;
     border: 2px solid #007bff;
     color: white;
     padding: 20px;
@@ -169,9 +169,8 @@ body {
 }
 
 .feature-btn:hover {
-    background: rgba(0, 123, 255, 0.3);
+    background: none !important;
     transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 15px 40px rgba(0, 123, 255, 0.4);
     border-color: #fff;
     text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
 }
