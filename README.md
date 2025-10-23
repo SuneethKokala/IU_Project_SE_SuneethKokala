@@ -8,3 +8,14 @@ The Women’s Safe Enroute Companion project aims to solve this problem by creat
 The main goal of this project is to build a supportive and reliable companion that increase women’s confidence while travelling. By raising awareness and encouraging community participation, the project hopes to make daily travel safer and more comfortable for women everywhere.
 
 
+# Goal
+
+The main goals of the **Women’s Safe Route Companion** project are:
+
+- To enhance the safety and confidence of women while traveling.  
+- To provide real time safe route suggestions based on crime data, lighting conditions and user reports.  
+- To enable users to make informed travel decisions through an interactive and user friendly interface.  
+- To offer real time safety alerts and live location tracking for emergency situations.  
+- To allow users to report incidents, contributing to community driven safety improvements.  
+- To utilize modern technologies like FastAPI, React.js, PostgreSQL and mapping APIs for a secure and scalable solution.  
+- To promote community awareness and safer urban mobility for women.
