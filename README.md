@@ -19,3 +19,16 @@ The main goals of the **Women’s Safe Route Companion** project are:
 - To allow users to report incidents, contributing to community driven safety improvements.  
 - To utilize modern technologies like FastAPI, React.js, PostgreSQL and mapping APIs for a secure and scalable solution.  
 - To promote community awareness and safer urban mobility for women.
+
+# Tech Stack
+| Category | Technology | Purpose / Description |
+|-----------|-------------|------------------------|
+| 🖥️ Frontend | **React.js** | Builds a responsive and interactive user interface for maps, routes and alerts. |
+| ⚙️ Backend | **FastAPI (Python)** | Handles API requests, authentication and route safety analysis with high performance. |
+| 🗄️ Database | **PostgreSQL** | Stores user data, crime reports and route information with PostGIS for geolocation support. |
+| 🧩 Mapping & APIs | **Google Maps API / OpenStreetMap API** | Provides route generation, geolocation and map visualization. |
+| 🐳 Containerization | **Docker** | Containerizes backend, frontend and database for consistent deployment. |
+| ☁️ Cloud Hosting | **AWS** | Hosts the full application online for scalability and global access. |
+| 🔐 Version Control | **Git & GitHub** | Manages source code, tracks changes and supports collaboration. |
+
+# 
