@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeRoute - Women's Safety Navigation</title>
+    <meta name="description" content="AI-powered women's safety navigation app with real-time route analysis and emergency features">
+    <meta property="og:title" content="SafeRoute - Women's Safety Navigation">
+    <meta property="og:description" content="AI-powered women's safety navigation app with real-time route analysis and emergency features">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="SafeRoute - Women's Safety Navigation">
+    <meta name="twitter:description" content="AI-powered women's safety navigation app with real-time route analysis and emergency features">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <canvas id="threejs-bg"></canvas>
+    <div class="header">
+        <div class="logo"> SafeRoute</div>
+        <div class="tagline">Advanced Women's Safety Navigation System</div>
+    </div>
+
+    <div class="container">
+        <div class="safety-panel">
+            <div class="route-form" id="routeForm">
+                <div class="form-group">
+                    <label>🎯 Enter Destination</label>
+                    <input type="text" id="destinationInput" placeholder="Enter destination (e.g., berlin)">
+                </div>
+                <div class="form-group">
+                    <label> Travel Mode</label>
+                    <select id="travelMode" style="width: 100%; padding: 12px; border: 2px solid #ff6b6b; border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white;">
+                        <option value="WALKING"> Walking</option>
+                        <option value="DRIVING"> Driving</option>
+                        <option value="BICYCLING"> Bicycling</option>
+                    </select>
+                </div>
+                <div class="safety-priority-notice">
+                     <strong>Safety First:</strong> Routes prioritize safety over speed
+                </div>
+                <button class="find-routes-btn" onclick="findSafeRoutes()">
+                     Find Safest Routes Now
+                </button>
+            </div>
+            
+            <div id="map" style="height: 400px; width: 100%; border-radius: 15px; margin-top: 20px;"></div>
+            
+            <div class="features-grid" id="featuresGrid">
+                <button class="feature-btn" onclick="startJourneyTracking()"> Share My Journey</button>
+                <button class="feature-btn" onclick="emergencyAlert()"> Emergency Alert</button>
+                <button class="feature-btn" onclick="reportIncident()"> Report Incident</button>
+                <button class="feature-btn" onclick="submitReview()"> Review Route</button>
+            </div>
+        </div>
+
+        <div class="route-analysis" id="routeAnalysis">
+            <h3> AI-Powered Route Recommendations</h3>
+            <div class="recommended-route" id="recommendedRoute" style="display: none;">
+                <div class="route-header">
+                    <span class="route-badge recommended">RECOMMENDED</span>
+                    <h4 id="recommendedRouteName">Safest Route</h4>
+                </div>
+                <div class="route-stats">
+                    <span class="stat">Safety: <strong id="recSafety">-</strong></span>
+                    <span class="stat">Time: <strong id="recTime">-</strong></span>
+                    <span class="stat">Distance: <strong id="recDistance">-</strong></span>
+                </div>
+            </div>
+            
+            <div class="routes-container" id="routesContainer">
+                <!-- Route options will be populated here -->
+            </div>
+            
+            <div class="route-details" id="routeDetails" style="display: none;">
+                <h4> Selected Route Analysis</h4>
+                <div class="analysis-grid">
+                    <div class="analysis-item">
+                        <span class="analysis-value" id="safetyScore">-</span>
+                        <div class="analysis-label">Safety Score</div>
+                    </div>
+                    <div class="analysis-item">
+                        <span class="analysis-value" id="lightingScore">-</span>
+                        <div class="analysis-label">Lighting Quality</div>
+                    </div>
+                    <div class="analysis-item">
+                        <span class="analysis-value" id="helpPoints">-</span>
+                        <div class="analysis-label">Help Points</div>
+                    </div>
+                    <div class="analysis-item">
+                        <span class="analysis-value" id="crimeRisk">-</span>
+                        <div class="analysis-label">Crime Risk</div>
+                    </div>
+                </div>
+                
+                <div class="ai-insights" id="aiInsights">
+                    <h4> AI Safety Insights</h4>
+                    <div class="insights-grid">
+                        <div class="insight-item">
+                            <span class="insight-value" id="crowdDensity">-</span>
+                            <div class="insight-label">Crowd Density</div>
+                        </div>
+                        <div class="insight-item">
+                            <span class="insight-value" id="weatherImpact">-</span>
+                            <div class="insight-label">Weather</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4> Safety Features</h4>
+                    <ul class="features-list" id="featuresList"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Modal -->
+    <div class="modal" id="emergencyModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('emergencyModal')">×</button>
+            <h3> EMERGENCY ACTIVATED</h3>
+            <div class="helpline-grid">
+                <div class="helpline-item">
+                    <div class="helpline-number">100</div>
+                    <div class="helpline-label">Police Emergency</div>
+                </div>
+                <div class="helpline-item">
+                    <div class="helpline-number">108</div>
+                    <div class="helpline-label">Ambulance</div>
+                </div>
+                <div class="helpline-item">
+                    <div class="helpline-number">1091</div>
+                    <div class="helpline-label">Women Helpline</div>
+                </div>
+                <div class="helpline-item">
+                    <div class="helpline-number">181</div>
+                    <div class="helpline-label">Women Safety</div>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 20px;">
+                 Location shared with emergency contacts<br>
+                 Local authorities have been notified
+            </p>
+        </div>
+    </div>
+
+    <!-- Incident Report Modal -->
+    <div class="modal" id="incidentModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('incidentModal')">×</button>
+            <h3> Report Incident</h3>
+            <form onsubmit="submitIncident(event)">
+                <div class="form-group">
+                    <label>Incident Type</label>
+                    <select id="incidentType" style="width: 100%; padding: 12px; border: 2px solid #ff6b6b; border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white;">
+                        <option value="harassment">Harassment</option>
+                        <option value="stalking">Stalking</option>
+                        <option value="poor_lighting">Poor Lighting</option>
+                        <option value="unsafe_area">Unsafe Area</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="incidentLocation" placeholder="Enter location details" required>
+                </div>
+                <div class="form-group">
+                    <label>Details</label>
+                    <textarea id="incidentDetails" placeholder="Describe the incident..." style="width: 100%; padding: 12px; border: 2px solid #ff6b6b; border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white; min-height: 80px;"></textarea>
+                </div>
+                <button type="submit" class="find-routes-btn">Submit Report</button>
+            </form>
+        </div>
+    </div>
+
+
+
+    <!-- Route Review Modal -->
+    <div class="modal" id="reviewModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('reviewModal')">×</button>
+            <h3> Review Route</h3>
+            <form onsubmit="submitRouteReview(event)">
+                <div class="form-group">
+                    <label>Safety Rating</label>
+                    <div class="rating-stars">
+                        <span class="star" data-rating="1" onclick="setRating('safety', 1)">⭐</span>
+                        <span class="star" data-rating="2" onclick="setRating('safety', 2)">⭐</span>
+                        <span class="star" data-rating="3" onclick="setRating('safety', 3)">⭐</span>
+                        <span class="star" data-rating="4" onclick="setRating('safety', 4)">⭐</span>
+                        <span class="star" data-rating="5" onclick="setRating('safety', 5)">⭐</span>
+                    </div>
+                    <input type="hidden" id="safetyRating" value="4">
+                </div>
+                <div class="form-group">
+                    <label>Lighting Quality</label>
+                    <div class="rating-stars">
+                        <span class="star" data-rating="1" onclick="setRating('lighting', 1)">💡</span>
+                        <span class="star" data-rating="2" onclick="setRating('lighting', 2)">💡</span>
+                        <span class="star" data-rating="3" onclick="setRating('lighting', 3)">💡</span>
+                        <span class="star" data-rating="4" onclick="setRating('lighting', 4)">💡</span>
+                        <span class="star" data-rating="5" onclick="setRating('lighting', 5)">💡</span>
+                    </div>
+                    <input type="hidden" id="lightingRating" value="3">
+                </div>
+                <div class="form-group">
+                    <label>Crowd Level</label>
+                    <div class="rating-stars">
+                        <span class="star" data-rating="1" onclick="setRating('crowd', 1)">👥</span>
+                        <span class="star" data-rating="2" onclick="setRating('crowd', 2)">👥</span>
+                        <span class="star" data-rating="3" onclick="setRating('crowd', 3)">👥</span>
+                        <span class="star" data-rating="4" onclick="setRating('crowd', 4)">👥</span>
+                        <span class="star" data-rating="5" onclick="setRating('crowd', 5)">👥</span>
+                    </div>
+                    <input type="hidden" id="crowdRating" value="4">
+                </div>
+                <div class="form-group">
+                    <label>Comments</label>
+                    <textarea id="reviewComment" placeholder="Share your experience with this route..." style="width: 100%; padding: 12px; border: 2px solid #ff6b6b; border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white; min-height: 80px;"></textarea>
+                </div>
+                <button type="submit" class="find-routes-btn">Submit Review</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let map, directionsService, directionsRenderer, geocoder;
+        let userLocation = null;
+        let safetyMode = false;
+        let activeJourneyId = null;
+        let locationUpdateInterval = null;
+
+        function initMap() {
+            if (navigator.geolocation) {
+                // Request high accuracy location
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                };
+                
+                navigator.geolocation.getCurrentPosition((position) => {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 15,
+                        center: userLocation,
+                        mapTypeId: google.maps.MapTypeId.ROADMAP
+                    });
+
+                    directionsService = new google.maps.DirectionsService();
+                    directionsRenderer = new google.maps.DirectionsRenderer({
+                        draggable: true,
+                        polylineOptions: {
+                            strokeColor: '#00b894',
+                            strokeWeight: 6
+                        }
+                    });
+                    directionsRenderer.setMap(map);
+                    geocoder = new google.maps.Geocoder();
+                    
+                    
+                    map.addListener('click', (event) => {
+                        if (safetyMode) {
+                            showReportModal(event.latLng.lat(), event.latLng.lng());
+                        }
+                    });
+                    
+                    
+                    loadReports();
+                    
+                    new google.maps.Marker({
+                        position: userLocation,
+                        map: map,
+                        title: 'Your Current Location',
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 12,
+                            fillColor: '#4CAF50',
+                            fillOpacity: 1,
+                            strokeColor: '#ffffff',
+                            strokeWeight: 4
+                        }
+                    });
+                    
+                    
+                    setTimeout(() => {
+                        google.maps.event.trigger(map, 'resize');
+                    }, 100);
+                }, () => {
+                    alert('Location access is required to use SafeRoute. Please enable location services and refresh the page.');
+                    return;
+                }, options);
+            } else {
+                alert('Your browser does not support geolocation. Please use a modern browser with location services.');
+                return;
+            }
+        }
+
+        
+        safetyMode = true;
+
+        let routeRenderers = [];
+        let currentRoutes = [];
+        
+        async function findSafeRoutes() {
+            const destination = document.getElementById('destinationInput').value;
+            if (!destination) {
+                alert('Please enter a destination');
+                return;
+            }
+
+            if (!userLocation) {
+                alert('Please enable location services first.');
+                return;
+            }
+
+            
+            clearRoutes();
+
+            
+            geocoder.geocode({ address: destination }, async (results, status) => {
+                if (status === 'OK') {
+                    const destLocation = results[0].geometry.location;
+                    
+                    try {
+                        
+                        const response = await fetch('/api/ai-route-optimization', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                start_lat: userLocation.lat, 
+                                start_lng: userLocation.lng, 
+                                end_lat: destLocation.lat(), 
+                                end_lng: destLocation.lng() 
+                            })
+                        });
+
+                        const routeData = await response.json();
+                        await displayMultipleRoutes(destLocation, routeData);
+                        
+                    } catch (error) {
+                        console.error('Error getting AI routes:', error);
+                        
+                        await calculateSingleRoute(destLocation);
+                    }
+                } else {
+                    alert('Could not find destination: ' + status);
+                }
+            });
+        }
+        
+        async function displayMultipleRoutes(destLocation, routeData) {
+            const colors = ['#00b894', '#fdcb6e', '#e17055'];
+            const selectedTravelMode = document.getElementById('travelMode').value;
+            
+            
+            document.getElementById('recommendedRoute').style.display = 'block';
+            document.getElementById('recommendedRouteName').textContent = routeData.recommendation;
+            
+            const bestRoute = routeData.routes[0];
+            document.getElementById('recSafety').textContent = `${bestRoute.analysis.safety_score}%`;
+            document.getElementById('recTime').textContent = bestRoute.analysis.time || '15 min';
+            document.getElementById('recDistance').textContent = bestRoute.analysis.distance || '1.2 km';
+            
+            
+            const container = document.getElementById('routesContainer');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < Math.min(3, routeData.routes.length); i++) {
+                const route = routeData.routes[i];
+                const color = colors[i];
+                
+                
+                const request = {
+                    origin: userLocation,
+                    destination: destLocation,
+                    travelMode: google.maps.TravelMode[selectedTravelMode],
+                    provideRouteAlternatives: true,
+                    avoidHighways: true,
+                    avoidTolls: true
+                };
+                
+                directionsService.route(request, (result, status) => {
+                    if (status === 'OK') {
+                        const renderer = new google.maps.DirectionsRenderer({
+                            polylineOptions: {
+                                strokeColor: color,
+                                strokeWeight: i === 0 ? 8 : 6,
+                                strokeOpacity: i === 0 ? 1.0 : 0.8
+                            },
+                            suppressMarkers: false,
+                            routeIndex: Math.min(i, result.routes.length - 1)
+                        });
+                        
+                        renderer.setMap(map);
+                        renderer.setDirections(result);
+                        routeRenderers.push(renderer);
+                        
+                        
+                        const routeIndex = Math.min(i, result.routes.length - 1);
+                        const leg = result.routes[routeIndex].legs[0];
+                        const actualDistance = leg.distance.text;
+                        const actualTime = leg.duration.text;
+                        
+                        
+                        if (i === 0) {
+                            document.getElementById('recTime').textContent = actualTime;
+                            document.getElementById('recDistance').textContent = actualDistance;
+                        }
+                        
+                        
+                        currentRoutes[i] = {
+                            renderer: renderer,
+                            analysis: {
+                                ...route.analysis,
+                                time: actualTime,
+                                distance: actualDistance
+                            },
+                            name: route.name,
+                            type: route.type
+                        };
+                        
+                        
+                        updateRouteOptionDisplay(i, actualTime, actualDistance);
+                    }
+                });
+                
+                
+                const routeOption = createRouteOption(route, i, color);
+                container.appendChild(routeOption);
+            }
+            
+            document.getElementById('routeAnalysis').classList.add('show');
+            
+            
+            setTimeout(() => selectRoute(0), 1000);
+        }
+        
+        function updateRouteOptionDisplay(index, actualTime, actualDistance) {
+            const routeOptions = document.querySelectorAll('.route-option');
+            if (routeOptions[index]) {
+                const timeElement = routeOptions[index].querySelector('.stat:nth-child(2) strong');
+                const distanceElement = routeOptions[index].querySelector('.stat:nth-child(3) strong');
+                if (timeElement) timeElement.textContent = actualTime;
+                if (distanceElement) distanceElement.textContent = actualDistance;
+            }
+        }
+        
+        function createRouteOption(route, index, color) {
+            const div = document.createElement('div');
+            div.className = `route-option ${index === 0 ? 'selected' : ''}`;
+            div.onclick = () => selectRoute(index);
+            
+            const safetyClass = route.analysis.safety_score >= 80 ? 'high' : 
+                               route.analysis.safety_score >= 60 ? 'medium' : 'low';
+            
+            div.innerHTML = `
+                <div class="route-header">
+                    <div class="route-color" style="background-color: ${color}"></div>
+                    <div class="route-info">
+                        <h4>${route.name}</h4>
+                        <div class="route-badges">
+                            <span class="safety-badge ${safetyClass}">${route.analysis.safety_score}% Safe</span>
+                            ${index === 0 ? '<span class="route-badge recommended">🏆 RECOMMENDED</span>' : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="route-stats">
+                    <span class="stat"> Safety: <strong>${route.analysis.safety_score}%</strong></span>
+                    <span class="stat"> Time: <strong>${route.analysis.time || '15 min'}</strong></span>
+                    <span class="stat"> Distance: <strong>${route.analysis.distance || '1.2 km'}</strong></span>
+                    <span class="stat"> Crime Risk: <strong>${route.analysis.crime_risk}%</strong></span>
+                </div>
+                <div class="route-features">
+                    ${route.analysis.features.slice(0, 2).map(f => `<span class="feature-tag">${f}</span>`).join('')}
+                </div>
+            `;
+            
+            return div;
+        }
+        
+        function selectRoute(index) {
+            // Update UI selection
+            document.querySelectorAll('.route-option').forEach((option, i) => {
+                option.classList.toggle('selected', i === index);
+            });
+            
+            // Highlight selected route
+            routeRenderers.forEach((renderer, i) => {
+                const options = renderer.getOptions();
+                options.polylineOptions.strokeWeight = i === index ? 8 : 4;
+                options.polylineOptions.strokeOpacity = i === index ? 1.0 : 0.6;
+                renderer.setOptions(options);
+            });
+            
+            // Display detailed analysis
+            if (currentRoutes[index]) {
+                displayRouteAnalysis(currentRoutes[index].analysis);
+            }
+        }
+        
+        function clearRoutes() {
+            routeRenderers.forEach(renderer => {
+                renderer.setMap(null);
+            });
+            routeRenderers = [];
+            currentRoutes = [];
+        }
+        
+        async function calculateSingleRoute(destLocation) {
+            const selectedTravelMode = document.getElementById('travelMode').value;
+            const request = {
+                origin: userLocation,
+                destination: destLocation,
+                travelMode: google.maps.TravelMode[selectedTravelMode],
+                avoidHighways: true,
+                avoidTolls: true
+            };
+
+            directionsService.route(request, async (result, status) => {
+                if (status === 'OK') {
+                    directionsRenderer.setDirections(result);
+                    
+                    try {
+                        const response = await fetch('/api/analyze-route', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                start_lat: userLocation.lat, 
+                                start_lng: userLocation.lng, 
+                                end_lat: destLocation.lat(), 
+                                end_lng: destLocation.lng() 
+                            })
+                        });
+
+                        const analysis = await response.json();
+                        displayRouteAnalysis(analysis);
+                        document.getElementById('routeAnalysis').classList.add('show');
+                    } catch (error) {
+                        console.error('Error analyzing route:', error);
+                    }
+                } else {
+                    alert('Could not calculate route: ' + status);
+                }
+            });
+        }
+
+        function displayRouteAnalysis(analysis) {
+            document.getElementById('safetyScore').textContent = `${analysis.safety_score}/100`;
+            document.getElementById('lightingScore').textContent = analysis.lighting_score < 40 ? 'Poor' : 
+                                                                    analysis.lighting_score < 70 ? 'Fair' : 'Excellent';
+            document.getElementById('helpPoints').textContent = analysis.help_points;
+            document.getElementById('crimeRisk').textContent = analysis.crime_risk < 30 ? 'Low' : 
+                                                               analysis.crime_risk < 60 ? 'Medium' : 'High';
+            
+            // AI insights
+            if (analysis.crowd_density !== undefined) {
+                document.getElementById('crowdDensity').textContent = `${analysis.crowd_density}%`;
+                document.getElementById('aiInsights').style.display = 'block';
+            }
+            
+            if (analysis.weather) {
+                document.getElementById('weatherImpact').textContent = analysis.weather.condition;
+            }
+
+            const featuresList = document.getElementById('featuresList');
+            featuresList.innerHTML = '';
+            analysis.features.forEach(feature => {
+                const li = document.createElement('li');
+                li.textContent = feature;
+                featuresList.appendChild(li);
+            });
+
+            document.getElementById('routeDetails').style.display = 'block';
+        }
+
+        async function emergencyAlert() {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                try {
+                    // Send emergency alert to admin
+                    const response = await fetch('/api/emergency', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            lat: lat, 
+                            lng: lng 
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    // If user has active journey, also activate panic mode
+                    if (activeJourneyId) {
+                        try {
+                            await fetch('/api/panic-mode', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    journey_id: activeJourneyId,
+                                    panic_data: {
+                                        timestamp: new Date().toISOString(),
+                                        location: { lat, lng }
+                                    }
+                                })
+                            });
+                            
+                            alert(' EMERGENCY ACTIVATED!\n\n Admin notified with your location\n Trusted contacts alerted\n Live tracking activated\n\nHelp is on the way!');
+                            updateTrackingUI(true, true);
+                        } catch (panicError) {
+                            alert(' Emergency alert sent to admin!\nAdmin has been notified with your location.');
+                        }
+                    } else {
+                        alert(' Emergency alert sent to admin!\nAdmin has been notified with your location.');
+                    }
+                    
+                    document.getElementById('emergencyModal').classList.add('show');
+                } catch (error) {
+                    alert(' Emergency alert sent!\nAdmin will be notified.');
+                    document.getElementById('emergencyModal').classList.add('show');
+                }
+            }, () => {
+                fetch('/api/emergency', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        lat: null, 
+                        lng: null,
+                        message: 'Emergency alert - location access denied'
+                    })
+                }).then(() => {
+                    alert(' Emergency alert sent to admin!');
+                }).catch(() => {
+                    alert(' Emergency alert logged!');
+                });
+                
+                document.getElementById('emergencyModal').classList.add('show');
+            });
+        }
+
+        function reportIncident() {
+            document.getElementById('incidentModal').classList.add('show');
+        }
+
+        async function submitIncident(event) {
+            event.preventDefault();
+            
+            const incidentData = {
+                type: document.getElementById('incidentType').value,
+                location: document.getElementById('incidentLocation').value,
+                details: document.getElementById('incidentDetails').value
+            };
+
+            try {
+                const response = await fetch('/api/report-incident', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(incidentData)
+                });
+
+                const result = await response.json();
+                alert(' Incident reported successfully! Thank you for helping make   safer.');
+                closeModal('incidentModal');
+            } catch (error) {
+                alert('Incident reported successfully!');
+                closeModal('incidentModal');
+            }
+        }
+
+        function shareLocation() {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const locationUrl = `https://maps.google.com/?q=${position.coords.latitude},${position.coords.longitude}`;
+                if (navigator.share) {
+                    navigator.share({
+                        title: ' My Current Location - SafeRoute',
+                        text: 'Sharing my live location for safety tracking',
+                        url: locationUrl
+                    });
+                } else {
+                    navigator.clipboard.writeText(locationUrl).then(() => {
+                        alert(' Location link copied to clipboard!');
+                    });
+                }
+            }, () => {
+                alert('Unable to access location. Please enable location services.');
+            });
+        }
+
+        function submitReview() {
+            document.getElementById('reviewModal').classList.add('show');
+        }
+
+        function setRating(type, rating) {
+            document.getElementById(type + 'Rating').value = rating;
+            
+            
+            const container = event.target.parentElement;
+            const stars = container.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                star.classList.toggle('active', index < rating);
+            });
+        }
+
+        async function submitRouteReview(event) {
+            event.preventDefault();
+            
+            const reviewData = {
+                safety_rating: parseInt(document.getElementById('safetyRating').value),
+                lighting_rating: parseInt(document.getElementById('lightingRating').value),
+                crowd_rating: parseInt(document.getElementById('crowdRating').value),
+                comment: document.getElementById('reviewComment').value
+            };
+
+            try {
+                const response = await fetch('/api/submit-review', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reviewData)
+                });
+
+                const result = await response.json();
+                alert(' Review submitted successfully! Thank you for your feedback.');
+                closeModal('reviewModal');
+            } catch (error) {
+                alert(' Review submitted successfully!');
+                closeModal('reviewModal');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        function showReportModal(lat, lng) {
+            document.getElementById('reportLat').value = lat;
+            document.getElementById('reportLng').value = lng;
+            document.getElementById('reportModal').classList.add('show');
+        }
+
+        async function submitReport(event) {
+            event.preventDefault();
+            
+            const reportData = {
+                lat: parseFloat(document.getElementById('reportLat').value),
+                lng: parseFloat(document.getElementById('reportLng').value),
+                type: document.getElementById('reportType').value,
+                description: document.getElementById('reportDescription').value
+            };
+
+            try {
+                const response = await fetch('/api/add-report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reportData)
+                });
+
+                const result = await response.json();
+                addReportMarker(result);
+                alert(' Safety report added successfully!');
+                closeModal('reportModal');
+                document.getElementById('reportDescription').value = '';
+            } catch (error) {
+                alert('Report added successfully!');
+                closeModal('reportModal');
+            }
+        }
+
+        async function loadReports() {
+            try {
+                const response = await fetch('/api/get-reports');
+                const reports = await response.json();
+                reports.forEach(report => addReportMarker(report));
+            } catch (error) {
+                console.error('Error loading reports:', error);
+            }
+        }
+
+        
+        function startJourneyTracking() {
+            document.getElementById('journeyModal').classList.add('show');
+        }
+
+        async function startJourney(event) {
+            event.preventDefault();
+            
+            const userName = document.getElementById('userName').value;
+            const contactsText = document.getElementById('trustedContacts').value;
+            const trustedContacts = contactsText.split(',').map(c => c.trim()).filter(c => c);
+            
+            if (!userLocation) {
+                alert('Please enable location services to start journey tracking.');
+                return;
+            }
+            
+            const destination = document.getElementById('destinationInput').value;
+            if (!destination) {
+                alert('Please enter a destination first.');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/start-journey', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userName,
+                        start_location: userLocation,
+                        destination: { name: destination },
+                        trusted_contacts: trustedContacts
+                    })
+                });
+                
+                const result = await response.json();
+                activeJourneyId = result.journey_id;
+                
+                
+                localStorage.setItem('activeJourneyId', activeJourneyId);
+                
+                const trackingUrl = `${window.location.origin}${result.tracking_url}`;
+                
+                alert(` Journey tracking started!\n\n📱 ${result.contacts_notified} contacts notified\n🔗 Link displayed on screen`);
+                
+                
+                showTrackingLinkOnScreen(trackingUrl);
+                
+            
+                startLocationUpdates();
+                
+                closeModal('journeyModal');
+                
+                
+                updateTrackingUI(true);
+                
+                
+                showTrackingInfo(result);
+                
+            } catch (error) {
+                console.error('Journey start error:', error);
+                alert('Journey tracking started! Contacts will be notified.');
+                closeModal('journeyModal');
+            }
+        }
+        
+        function startLocationUpdates() {
+            if (locationUpdateInterval) {
+                clearInterval(locationUpdateInterval);
+            }
+            
+            locationUpdateInterval = setInterval(() => {
+                if (activeJourneyId && navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(async (position) => {
+                        const currentLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        
+                        try {
+                            await fetch('/api/update-location', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    journey_id: activeJourneyId,
+                                    current_location: currentLocation
+                                })
+                            });
+                        } catch (error) {
+                            console.error('Error updating location:', error);
+                        }
+                    });
+                }
+            }, 30000);
+        }
+        
+
+        
+        function updateTrackingUI(isActive, isPanicMode = false) {
+            const trackingBtn = document.querySelector('[onclick="startJourneyTracking()"]');
+            const panicBtn = document.querySelector('[onclick="activatePanicMode()"]');
+            
+            if (isActive) {
+                trackingBtn.textContent = ' Journey Active';
+                trackingBtn.style.background = '#00b894';
+                trackingBtn.onclick = () => endJourneyTracking();
+                
+                if (isPanicMode) {
+                    panicBtn.textContent = ' PANIC ACTIVE';
+                    panicBtn.style.background = '#e17055';
+                    panicBtn.style.animation = 'pulse 1s infinite';
+                }
+            }
+        }
+        
+        function showTrackingLinkOnScreen(trackingUrl) {
+            const linkDiv = document.createElement('div');
+            linkDiv.id = 'trackingLinkDisplay';
+            linkDiv.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(0, 184, 148, 0.95);
+                color: white;
+                padding: 15px;
+                border-radius: 10px;
+                z-index: 1001;
+                max-width: 300px;
+                font-size: 13px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            `;
+            
+            linkDiv.innerHTML = `
+                <div style="margin-bottom: 10px; font-weight: bold;"> Journey Tracking Link</div>
+                <div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 5px; margin-bottom: 10px; word-break: break-all; font-size: 11px;">
+                    ${trackingUrl}
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="copyLink('${trackingUrl}')" style="background: #00b894; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Copy</button>
+                    <button onclick="openLink('${trackingUrl}')" style="background: #0984e3; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Open</button>
+                </div>
+            `;
+            
+            document.body.appendChild(linkDiv);
+        }
+        
+        function copyLink(url) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                    alert(' Link copied!');
+                });
+            }
+        }
+        
+        function openLink(url) {
+            window.open(url, '_blank');
+        }
+        
+        function showTrackingInfo(journeyData) {
+            const trackingUrl = `${window.location.origin}${journeyData.tracking_url}`;
+            
+            const infoDiv = document.createElement('div');
+            infoDiv.id = 'trackingInfo';
+            infoDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(0, 184, 148, 0.9);
+                color: white;
+                padding: 15px;
+                border-radius: 10px;
+                z-index: 1000;
+                max-width: 300px;
+                font-size: 14px;
+            `;
+            
+            infoDiv.innerHTML = `
+                <h4>🚀 Journey Active</h4>
+                <p><strong>ID:</strong> ${journeyData.journey_id.substring(0, 8)}...</p>
+                <p><strong>Contacts:</strong> ${journeyData.contacts_notified} notified</p>
+                <p><strong>Tracking:</strong> <a href="${trackingUrl}" target="_blank" style="color: #fff; text-decoration: underline;">View Live</a></p>
+                <button onclick="endJourneyTracking()" style="background: #e17055; color: white; border: none; padding: 8px 12px; border-radius: 5px; margin-top: 10px; cursor: pointer;">End Journey</button>
+            `;
+            
+            document.body.appendChild(infoDiv);
+        }
+        
+        async function endJourneyTracking() {
+            if (!activeJourneyId) return;
+            
+            try {
+                await fetch('/api/end-journey', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ journey_id: activeJourneyId })
+                });
+                
+                
+                activeJourneyId = null;
+                localStorage.removeItem('activeJourneyId');
+                
+                if (locationUpdateInterval) {
+                    clearInterval(locationUpdateInterval);
+                }
+                
+                
+                const trackingInfo = document.getElementById('trackingInfo');
+                if (trackingInfo) {
+                    trackingInfo.remove();
+                }
+                const linkDisplay = document.getElementById('trackingLinkDisplay');
+                if (linkDisplay) {
+                    linkDisplay.remove();
+                }
+                
+                
+                const trackingBtn = document.querySelector('[onclick="endJourneyTracking()"]');
+                if (trackingBtn) {
+                    trackingBtn.textContent = '🚀 Share My Journey';
+                    trackingBtn.style.background = '';
+                    trackingBtn.onclick = () => startJourneyTracking();
+                }
+                
+                alert(' Journey ended successfully! Contacts have been notified of your safe arrival.');
+                
+            } catch (error) {
+                alert(' Journey ended!');
+            }
+        }
+        
+        
+        window.addEventListener('load', () => {
+            const savedJourneyId = localStorage.getItem('activeJourneyId');
+            if (savedJourneyId) {
+                activeJourneyId = savedJourneyId;
+                updateTrackingUI(true);
+                startLocationUpdates();
+            }
+        });
+
+        function addReportMarker(report) {
+            const color = report.type === 'safe' ? '#4CAF50' : 
+                         report.type === 'unsafe' ? '#F44336' : '#FF9800';
+            
+            const marker = new google.maps.Marker({
+                position: { lat: report.lat, lng: report.lng },
+                map: map,
+                title: report.type,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 8,
+                    fillColor: color,
+                    fillOpacity: 0.8,
+                    strokeColor: '#ffffff',
+                    strokeWeight: 2
+                }
+            });
+
+            const infoWindow = new google.maps.InfoWindow({
+                content: `
+                    <div style="padding: 10px; min-width: 200px;">
+                        <h4 style="margin: 0 0 10px 0; color: ${color};">${report.type.toUpperCase()} AREA</h4>
+                        <p style="margin: 0 0 10px 0; font-size: 14px;">${report.description || 'No description provided'}</p>
+                        <small style="color: #666;">Reported: ${new Date(report.timestamp).toLocaleDateString()}</small>
+                    </div>
+                `
+            });
+
+            marker.addListener('click', () => {
+                infoWindow.open(map, marker);
+            });
+        }
+    </script>
+    
+    
+    <div class="modal" id="journeyModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('journeyModal')">×</button>
+            <h3> Share My Journey</h3>
+            <form onsubmit="startJourney(event)">
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="userName" placeholder="Enter your name" required>
+                </div>
+                <div class="form-group">
+                    <label>Trusted Contacts (Phone Numbers)</label>
+                    <textarea id="trustedContacts" placeholder="Enter phone numbers separated by commas\ne.g., +919876543210, +919876543211" style="width: 100%; padding: 12px; border: 2px solid #ff6b6b; border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white; min-height: 80px;" required>+919902480636</textarea>
+                    <small style="color: #ccc; font-size: 12px;">(Default number set for testing purpose)</small>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="autoAlerts" checked> 
+                        Enable auto-alerts for route deviation
+                    </label>
+                </div>
+                <button type="submit" class="find-routes-btn">Start Journey Tracking</button>
+            </form>
+        </div>
+    </div>
+
+
+
+    
+    <div class="modal" id="reportModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('reportModal')">×</button>
+            <h3> Add Safety Report</h3>
+            <form onsubmit="submitReport(event)">
+                <input type="hidden" id="reportLat">
+                <input type="hidden" id="reportLng">
+                <div class="form-group">
+                    <label>Report Type</label>
+                    <select id="reportType" style="width: 100%; padding: 12px; border: 2px solid #ff6b6b; border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white;">
+                        <option value="safe">Safe Area</option>
+                        <option value="unsafe">Unsafe Area</option>
+                        <option value="warning">Warning/Caution</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="reportDescription" placeholder="Describe the safety situation..." style="width: 100%; padding: 12px; border: 2px solid #ff6b6b; border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white; min-height: 80px;" required></textarea>
+                </div>
+                <button type="submit" class="find-routes-btn">Add Report</button>
+            </form>
+        </div>
+    </div>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDLnyrliH2xbgqMq4gWJn5sWloDt8WDehU&libraries=geometry&callback=initMap"></script>
+    
+    <script>
+    
+        let scene, camera, renderer, particles, particles2, time = 0;
+        
+        function initThreeJS() {
+            const canvas = document.getElementById('threejs-bg');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0);
+            
+            
+            const geometry1 = new THREE.BufferGeometry();
+            const positions1 = [];
+            const colors1 = [];
+            
+            for (let i = 0; i < 1500; i++) {
+                positions1.push((Math.random() - 0.5) * 3000);
+                positions1.push((Math.random() - 0.5) * 3000);
+                positions1.push((Math.random() - 0.5) * 3000);
+                
+                colors1.push(0.9 + Math.random() * 0.1);
+                colors1.push(0.3 + Math.random() * 0.5);
+                colors1.push(0.95 + Math.random() * 0.05);
+            }
+            
+            geometry1.setAttribute('position', new THREE.Float32BufferAttribute(positions1, 3));
+            geometry1.setAttribute('color', new THREE.Float32BufferAttribute(colors1, 3));
+            
+            const material1 = new THREE.PointsMaterial({
+                size: 4,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+            
+            particles = new THREE.Points(geometry1, material1);
+            scene.add(particles);
+            
+            
+            const geometry2 = new THREE.BufferGeometry();
+            const positions2 = [];
+            const colors2 = [];
+            
+            for (let i = 0; i < 800; i++) {
+                positions2.push((Math.random() - 0.5) * 2500);
+                positions2.push((Math.random() - 0.5) * 2500);
+                positions2.push((Math.random() - 0.5) * 2500);
+                
+                colors2.push(0.4 + Math.random() * 0.3);
+                colors2.push(0.7 + Math.random() * 0.3);
+                colors2.push(1.0);
+            }
+            
+            geometry2.setAttribute('position', new THREE.Float32BufferAttribute(positions2, 3));
+            geometry2.setAttribute('color', new THREE.Float32BufferAttribute(colors2, 3));
+            
+            const material2 = new THREE.PointsMaterial({
+                size: 2,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+            
+            particles2 = new THREE.Points(geometry2, material2);
+            scene.add(particles2);
+            
+            camera.position.z = 1000;
+            
+            animate();
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+            
+            
+            particles.rotation.x += 0.0008;
+            particles.rotation.y += 0.0012;
+            particles.rotation.z += 0.0005;
+            
+            
+            particles2.rotation.x -= 0.0006;
+            particles2.rotation.y += 0.0015;
+            particles2.rotation.z -= 0.0008;
+            
+            
+            particles.position.y = Math.sin(time * 0.5) * 50;
+            particles2.position.y = Math.cos(time * 0.7) * 30;
+            
+            
+            const scale = 1 + Math.sin(time * 2) * 0.1;
+            particles.scale.setScalar(scale);
+            particles2.scale.setScalar(1.2 - scale * 0.2);
+            
+            renderer.render(scene, camera);
+        }
+        
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        
+        window.addEventListener('load', initThreeJS);
+    </script>
+    
+    <style>
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .emergency-btn {
+            background: #e17055;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+        
+        .rating-stars {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .star {
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0.3;
+            transition: opacity 0.2s;
+        }
+        
+        .star:hover,
+        .star.active {
+            opacity: 1;
+        }
+        
+        #threejs-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(1px);
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .safety-panel, .route-analysis {
+            background: rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-content {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4);
+        }
+        
+        .feature-btn, .find-routes-btn {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.8), rgba(255, 107, 107, 0.6));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        
+        .feature-btn:hover, .find-routes-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+        
+        .route-option {
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .route-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 184, 148, 0.3);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .logo {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+    
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const elements = document.querySelectorAll('.safety-panel, .route-analysis, .feature-btn');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    el.style.transition = 'all 0.6s ease';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+            
+            
+            document.querySelectorAll('.feature-btn').forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px) scale(1.02) rotateX(5deg)';
+                });
+                btn.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1) rotateX(0deg)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

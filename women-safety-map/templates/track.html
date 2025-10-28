@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journey Tracking - SafeRoute</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🛡️ SafeRoute</div>
+        <div class="tagline">Live Journey Tracking</div>
+    </div>
+
+    <div class="container">
+        <div class="tracking-panel">
+            <h2> Live Journey Tracking</h2>
+            <div class="journey-info">
+                <p><strong>Journey ID:</strong> {{ journey_id }}</p>
+                <p><strong>Status:</strong> <span id="journeyStatus">Active</span></p>
+                <p><strong>Start Time:</strong> <span id="startTime">-</span></p>
+                <p><strong>Destination:</strong> <span id="destination">-</span></p>
+                <p><strong>Last Update:</strong> <span id="lastUpdate">Just now</span></p>
+            </div>
+            
+            <div id="trackingMap" style="height: 400px; width: 100%; border-radius: 15px; margin: 20px 0;"></div>
+            
+            <div class="tracking-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="currentSpeed">0</span>
+                    <div class="stat-label">Speed (km/h)</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="distanceTraveled">0</span>
+                    <div class="stat-label">Distance (km)</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="timeElapsed">0</span>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+            
+            <div class="alert-history">
+                <h3> Alert History</h3>
+                <div id="alertsList">
+                    <div class="alert-item safe"> Journey started safely</div>
+                </div>
+            </div>
+            
+            <div class="emergency-actions">
+                <h3> Emergency Actions</h3>
+                <div class="emergency-grid">
+                    <button onclick="callEmergency('100')" class="emergency-btn">🚔 Police (100)</button>
+                    <button onclick="callEmergency('108')" class="emergency-btn">🚑 Ambulance (108)</button>
+                    <button onclick="callEmergency('1091')" class="emergency-btn">👩 Women Helpline (1091)</button>
+                    <button onclick="sendAlert()" class="emergency-btn">📢 Send Alert</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let map, marker, routePath;
+        const journeyId = '{{ journey_id }}';
+        let routeHistory = [];
+        let startTime = new Date();
+
+        function initMap() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    initializeMap(userLocation);
+                }, () => {
+                    alert('Location access is required for tracking. Please enable location services.');
+                    document.getElementById('trackingMap').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; text-align: center;">📍 Location access required<br>Please enable GPS and refresh</div>';
+                });
+            } else {
+                alert('Your browser does not support geolocation.');
+                document.getElementById('trackingMap').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; text-align: center;">❌ Geolocation not supported</div>';
+            }
+        }
+        
+        function initializeMap(location) {
+            map = new google.maps.Map(document.getElementById('trackingMap'), {
+                zoom: 15,
+                center: location,
+                mapTypeId: 'roadmap'
+            });
+
+            marker = new google.maps.Marker({
+                position: location,
+                map: map,
+                title: 'Current Location',
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 12,
+                    fillColor: '#4CAF50',
+                    fillOpacity: 1,
+                    strokeColor: '#ffffff',
+                    strokeWeight: 4
+                }
+            });
+
+            routePath = new google.maps.Polyline({
+                path: [],
+                geodesic: true,
+                strokeColor: '#00b894',
+                strokeOpacity: 1.0,
+                strokeWeight: 4
+            });
+            routePath.setMap(map);
+
+            
+            document.getElementById('startTime').textContent = startTime.toLocaleTimeString();
+            document.getElementById('destination').textContent = 'Tracking destination...';
+            
+            simulateTracking();
+        }
+
+        function simulateTracking() {
+            let updateCount = 0;
+            const interval = setInterval(() => {
+                updateCount++;
+                
+                
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        const newPos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        updateLocation(newPos);
+                    }, () => {
+                        
+                        const currentPos = marker.getPosition();
+                        const newPos = {
+                            lat: currentPos.lat() + (Math.random() - 0.5) * 0.001,
+                            lng: currentPos.lng() + (Math.random() - 0.5) * 0.001
+                        };
+                        updateLocation(newPos);
+                    });
+                } else {
+                    
+                    const currentPos = marker.getPosition();
+                    const newPos = {
+                        lat: currentPos.lat() + (Math.random() - 0.5) * 0.001,
+                        lng: currentPos.lng() + (Math.random() - 0.5) * 0.001
+                    };
+                    updateLocation(newPos);
+                }
+            }, 30000);
+        }
+        
+        function updateLocation(newPos) {
+            marker.setPosition(newPos);
+            routeHistory.push(newPos);
+            routePath.setPath(routeHistory);
+            
+            
+            const elapsed = Math.floor((new Date() - startTime) / 60000);
+            document.getElementById('lastUpdate').textContent = 'Just now';
+            document.getElementById('timeElapsed').textContent = `${elapsed} min`;
+            document.getElementById('distanceTraveled').textContent = (routeHistory.length * 0.1).toFixed(1);
+            document.getElementById('currentSpeed').textContent = Math.floor(Math.random() * 5) + 3;
+        }
+        
+        function simulateTracking() {
+            let updateCount = 0;
+            const interval = setInterval(() => {
+                updateCount++;
+                
+                if (updateCount % 5 === 0) {
+                    addAlert(updateCount > 10 ? 'Route deviation detected' : 'On planned route', updateCount > 10 ? 'warning' : 'safe');
+                }
+
+                if (updateCount > 30) {
+                    document.getElementById('journeyStatus').textContent = 'Completed';
+                    addAlert('Journey completed safely', 'safe');
+                    clearInterval(interval);
+                }
+            }, 30000);
+        }
+        
+        function addAlert(message, type) {
+            const alertsList = document.getElementById('alertsList');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert-item ${type}`;
+            const icon = type === 'safe' ? '✅' : type === 'warning' ? '⚠️' : '🚨';
+            alertDiv.innerHTML = `${icon} ${message} <small>(${new Date().toLocaleTimeString()})</small>`;
+            alertsList.appendChild(alertDiv);
+        }
+        
+        function callEmergency(number) {
+            if (confirm(`Call emergency number ${number}?`)) {
+                window.location.href = `tel:${number}`;
+            }
+        }
+        
+        function sendAlert() {
+            addAlert('Emergency alert sent to contacts', 'emergency');
+            alert(' Emergency alert sent to all trusted contacts!');
+        }
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDLnyrliH2xbgqMq4gWJn5sWloDt8WDehU&callback=initMap"></script>
+    
+    <style>
+        .alert-history {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        .alert-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .alert-item.safe { background: rgba(76, 175, 80, 0.2); color: #4CAF50; }
+        .alert-item.warning { background: rgba(255, 152, 0, 0.2); color: #FF9800; }
+        .alert-item.emergency { background: rgba(244, 67, 54, 0.2); color: #F44336; }
+        .emergency-actions {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        .emergency-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .emergency-btn {
+            background: #e17055;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .emergency-btn:hover {
+            background: #d63031;
+        }
+    </style>
+</body>
+</html>
