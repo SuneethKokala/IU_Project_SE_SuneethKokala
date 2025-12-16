@@ -48,4 +48,7 @@ The main goals of the **Women’s Safe Route Companion** project are:
 # Notification Service (whatsapp Alert)
 Is set to the Default number.
 
+# Deployment
+https://women-safety-map.vercel.app/
+
 
