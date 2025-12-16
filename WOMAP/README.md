@@ -33,5 +33,7 @@ The main goals of the **Women’s Safe Route Companion** project are:
 
 # Phase Status
 1. Conception Phase - Done
-2. Development Phase - Under Progress
+2. Development Phase - Done
+3. Finalization Phase - Done
+
 

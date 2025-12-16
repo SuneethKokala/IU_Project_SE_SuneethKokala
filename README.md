@@ -33,5 +33,19 @@ The main goals of the **Women’s Safe Route Companion** project are:
 
 # Phase Status
 1. Conception Phase - Done
-2. Development Phase - Under Progress
+2. Development Phase - Done
+3. Finalization Phase - Done
+
+
+
+# Quick Start
+1. Navigate to the project directory: 'cd /Users/suneethk/Desktop/IU_Project_SE_SuneethKokala/WOMAP/women-safety-map'
+
+2. Install dependencies: 'pip install -r requirements.txt'
+
+3. Run the application: 'python3 start.py'
+
+# Notification Service (whatsapp Alert)
+Is set to the Default number.
+
 
